@@ -8,8 +8,9 @@ Thanks for contributing. This repo is a Go modular-monolith API for the Asnakech
 2. Create a branch from `master` — see [BRANCHING.md](./BRANCHING.md)
 3. Make changes; keep PRs focused on one concern
 4. Commit with [Conventional Commits](./COMMIT_CONVENTION.md)
-5. Push and open a Pull Request using the template
-6. Address review feedback; we squash-merge into `master`
+5. If you changed HTTP handlers, run `make docs` and commit `docs/swagger/`
+6. Push and open a Pull Request using the template
+7. Address review feedback; we squash-merge into `master`
 
 ```bash
 git clone https://github.com/kidusshoa/asnakech-servers.git

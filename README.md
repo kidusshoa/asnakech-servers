@@ -63,6 +63,8 @@ If Compose fails with **port is already allocated**, another stack is using that
 │   └── service/             # Use-cases / workflows
 ├── migrations/              # golang-migrate SQL (up/down)
 ├── docs/
+│   ├── api/                 # Envelope, versioning, API changelog
+│   ├── swagger/             # Generated OpenAPI (swag)
 │   ├── git/                 # Contributing, branching, commits, releases
 │   └── db/                  # Schema conventions
 ├── .github/                 # PR / issue templates, CODEOWNERS
@@ -94,7 +96,7 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `make test` | Run all tests |
 | `make clean` | Remove build artifacts and `tmp/` |
 | `make install` | Download modules |
-| `make tools` | Install Air (hot-reload) |
+| `make tools` | Install Air + swag CLI |
 | `make dev` | Hot-reload with Air, or `go run` |
 | `make up` | Docker Compose: API + infra |
 | `make up-infra` | Postgres + Redis + MinIO only |
@@ -104,6 +106,8 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `make migrate-down` | Roll back one migration |
 | `make migrate-version` | Show current migration version |
 | `make migrate-create NAME=…` | Scaffold a new migration pair |
+| `make docs` | Regenerate OpenAPI into `docs/swagger/` |
+| `make docs-check` | Fail if swagger output is stale |
 
 ## API Endpoints
 
@@ -111,8 +115,11 @@ If Compose fails with **port is already allocated**, another stack is using that
 |--------|------|-------------|
 | `GET` | `/health` | Liveness / version |
 | `GET` | `/ready` | Readiness (Postgres, Redis, S3 when configured) |
+| `GET` | `/swagger/index.html` | Interactive OpenAPI (Swagger UI) |
 | `GET` | `/api/v1/` | Welcome stub |
 | `GET` | `/api/v1/roles` | List seeded platform roles (requires DB) |
+
+Human-readable API guides: **[docs/api/](docs/api/README.md)**.
 
 Responses use a shared envelope:
 

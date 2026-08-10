@@ -1,0 +1,207 @@
+basePath: /
+definitions:
+  handlers.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/response.ErrorBody'
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: false
+        type: boolean
+    type: object
+  handlers.HealthData:
+    properties:
+      status:
+        example: ok
+        type: string
+      version:
+        example: 0.1.0
+        type: string
+    type: object
+  handlers.HealthResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.HealthData'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ReadyData:
+    properties:
+      checks:
+        items:
+          $ref: '#/definitions/ready.Status'
+        type: array
+      status:
+        example: ready
+        type: string
+      version:
+        example: 0.1.0
+        type: string
+    type: object
+  handlers.ReadyResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.ReadyData'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.RoleResponse:
+    properties:
+      code:
+        example: student
+        type: string
+      description:
+        example: Learner enrolled in courses
+        type: string
+      id:
+        example: a8b6d3f3-6b9b-42ee-98dc-9d8bf8ba2b0e
+        type: string
+      name:
+        example: Student
+        type: string
+    type: object
+  handlers.RolesListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.RoleResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.WelcomeData:
+    properties:
+      message:
+        example: Welcome to Asnakech School API
+        type: string
+      version:
+        example: 0.1.0
+        type: string
+    type: object
+  handlers.WelcomeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.WelcomeData'
+      success:
+        example: true
+        type: boolean
+    type: object
+  ready.Status:
+    properties:
+      error:
+        type: string
+      name:
+        type: string
+      ok:
+        type: boolean
+      skipped:
+        type: boolean
+    type: object
+  response.ErrorBody:
+    properties:
+      code:
+        type: string
+      message:
+        type: string
+    type: object
+  response.Meta:
+    properties:
+      page:
+        type: integer
+      per_page:
+        type: integer
+      request_id:
+        type: string
+      total:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@asnakech.com
+    name: API Support
+    url: http://www.asnakech.com/support
+  description: |-
+    Backend API for the Asnakech online education platform.
+    All JSON responses use a shared envelope: `{ success, data, error, meta }`.
+    Every response includes an `X-Request-ID` header.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://www.asnakech.com/terms
+  title: Asnakech School API
+  version: 0.1.0
+paths:
+  /api/v1/:
+    get:
+      description: Returns a short welcome payload for the v1 API root
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.WelcomeResponse'
+      summary: API welcome
+      tags:
+      - system
+  /api/v1/roles:
+    get:
+      description: Returns seeded system roles (student, teacher, admin, parent).
+        Requires DATABASE_URL and applied migrations.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.RolesListResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: List platform roles
+      tags:
+      - roles
+  /health:
+    get:
+      description: Returns OK when the process is running. Not under /api/v1.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.HealthResponse'
+      summary: Liveness probe
+      tags:
+      - health
+  /ready:
+    get:
+      description: Returns OK when configured dependencies are reachable. Not under
+        /api/v1.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ReadyResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Readiness probe
+      tags:
+      - health
+securityDefinitions:
+  BearerAuth:
+    description: 'JWT access token. Format: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

@@ -15,21 +15,14 @@ func NewRoleHandler(roles *service.RoleService) *RoleHandler {
 	return &RoleHandler{roles: roles}
 }
 
-type roleResponse struct {
-	ID          string `json:"id"`
-	Code        string `json:"code"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
 // ListRoles godoc
-// @Summary List platform roles
-// @Description Returns seeded system roles (student, teacher, admin, parent)
-// @Tags roles
-// @Produce json
-// @Success 200 {object} response.Envelope
-// @Failure 500 {object} response.Envelope
-// @Router /roles [get]
+// @Summary      List platform roles
+// @Description  Returns seeded system roles (student, teacher, admin, parent). Requires DATABASE_URL and applied migrations.
+// @Tags         roles
+// @Produce      json
+// @Success      200 {object} RolesListResponse
+// @Failure      500 {object} ErrorResponse
+// @Router       /api/v1/roles [get]
 func (h *RoleHandler) ListRoles(c *gin.Context) {
 	roles, err := h.roles.List(c.Request.Context())
 	if err != nil {
@@ -37,15 +30,15 @@ func (h *RoleHandler) ListRoles(c *gin.Context) {
 		return
 	}
 
-	out := make([]roleResponse, 0, len(roles))
+	out := make([]RoleResponse, 0, len(roles))
 	for _, role := range roles {
 		out = append(out, toRoleResponse(role))
 	}
 	response.OK(c, out)
 }
 
-func toRoleResponse(role domain.Role) roleResponse {
-	return roleResponse{
+func toRoleResponse(role domain.Role) RoleResponse {
+	return RoleResponse{
 		ID:          role.ID,
 		Code:        string(role.Code),
 		Name:        role.Name,

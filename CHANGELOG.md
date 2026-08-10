@@ -18,6 +18,8 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Air hot-reload (`.air.toml`) and Makefile targets: `tools`, `up`, `up-infra`, `down`, `logs`
 - PostgreSQL migrations (golang-migrate), `roles` table + seed, schema conventions in `docs/db/`
 - Shared pgx pool, role repository/service, and `GET /api/v1/roles`
+- OpenAPI via swag: `docs/swagger/`, Swagger UI at `/swagger/index.html`, guides in `docs/api/`
+- Configurable Compose host ports (`REDIS_HOST_PORT`, `MINIO_*_HOST_PORT`, …) to avoid local conflicts
 
 ### Changed
 

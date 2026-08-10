@@ -18,6 +18,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Dependencies are optional infrastructure handles wired at startup.
@@ -81,6 +83,7 @@ func (s *Server) registerRoutes() {
 
 	s.router.GET("/health", healthHandler.HealthCheck)
 	s.router.GET("/ready", healthHandler.ReadyCheck)
+	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := s.router.Group("/api/v1")
 	{

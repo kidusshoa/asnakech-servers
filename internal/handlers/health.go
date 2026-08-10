@@ -23,12 +23,12 @@ func NewHealthHandler(version string, checker *ready.Checker) *HealthHandler {
 }
 
 // HealthCheck godoc
-// @Summary Liveness probe
-// @Description Returns OK when the process is running
-// @Tags health
-// @Produce json
-// @Success 200 {object} response.Envelope
-// @Router /health [get]
+// @Summary      Liveness probe
+// @Description  Returns OK when the process is running. Not under /api/v1.
+// @Tags         health
+// @Produce      json
+// @Success      200 {object} HealthResponse
+// @Router       /health [get]
 func (h *HealthHandler) HealthCheck(c *gin.Context) {
 	response.OK(c, gin.H{
 		"status":  "ok",
@@ -37,13 +37,13 @@ func (h *HealthHandler) HealthCheck(c *gin.Context) {
 }
 
 // ReadyCheck godoc
-// @Summary Readiness probe
-// @Description Returns OK when configured dependencies are reachable
-// @Tags health
-// @Produce json
-// @Success 200 {object} response.Envelope
-// @Failure 503 {object} response.Envelope
-// @Router /ready [get]
+// @Summary      Readiness probe
+// @Description  Returns OK when configured dependencies are reachable. Not under /api/v1.
+// @Tags         health
+// @Produce      json
+// @Success      200 {object} ReadyResponse
+// @Failure      503 {object} ErrorResponse
+// @Router       /ready [get]
 func (h *HealthHandler) ReadyCheck(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 3*time.Second)
 	defer cancel()

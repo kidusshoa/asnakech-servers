@@ -1,5 +1,6 @@
 .PHONY: all build run test clean deps install dev generate up down logs tidy fmt \
-	tools migrate-up migrate-down migrate-version migrate-force migrate-create up-infra ps
+	tools migrate-up migrate-down migrate-version migrate-force migrate-create up-infra ps \
+	docs docs-check
 
 GOCMD=go
 GOBUILD=$(GOCMD) build
@@ -8,7 +9,9 @@ GOTEST=$(GOCMD) test
 BINARY_NAME=asnakech-servers
 AIR_VERSION=v1.61.7
 MIGRATE_VERSION=v4.18.2
+SWAG_VERSION=v1.16.4
 MIGRATE=$(GOCMD) run -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@$(MIGRATE_VERSION)
+SWAG=$(GOCMD) run github.com/swaggo/swag/cmd/swag@$(SWAG_VERSION)
 
 # Default local DB (override via env or .env)
 DATABASE_URL ?= postgres://asnakech:asnakech@localhost:5432/asnakech?sslmode=disable
@@ -46,8 +49,9 @@ dev:
 
 tools:
 	$(GOCMD) install github.com/air-verse/air@$(AIR_VERSION)
+	$(GOCMD) install github.com/swaggo/swag/cmd/swag@$(SWAG_VERSION)
 
-generate:
+generate: docs
 	$(GOCMD) generate ./...
 
 tidy:
@@ -55,6 +59,16 @@ tidy:
 
 fmt:
 	$(GOCMD) fmt ./...
+
+# --- OpenAPI / Swagger ------------------------------------------------------
+
+docs:
+	$(SWAG) init -g main.go -d ./cmd/api,./internal/handlers,./internal/response,./internal/platform/ready -o ./docs/swagger --parseInternal
+	@echo "OpenAPI written to docs/swagger/ — UI at http://localhost:8080/swagger/index.html"
+
+# Fails if annotations changed but docs/swagger was not regenerated.
+docs-check: docs
+	@git diff --exit-code -- docs/swagger || (echo "docs/swagger is stale — run make docs and commit"; exit 1)
 
 # --- Database migrations ----------------------------------------------------
 

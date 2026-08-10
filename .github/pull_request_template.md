@@ -20,6 +20,8 @@
 - [ ] Layering rules respected (`handlers` → `service` → `repository` / `domain`)
 - [ ] README or `docs/` updated if behavior/workflow changed
 - [ ] New/changed API endpoints use the shared response envelope (if applicable)
+- [ ] Ran `make docs` and committed `docs/swagger/` when handlers/annotations changed
+- [ ] Noted client-facing API changes in `docs/api/CHANGELOG.md` (if applicable)
 
 ## Test plan
 

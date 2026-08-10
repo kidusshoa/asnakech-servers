@@ -14,12 +14,12 @@ func NewWelcomeHandler(version string) *WelcomeHandler {
 }
 
 // Welcome godoc
-// @Summary API welcome
-// @Description Returns a short welcome payload for the v1 API root
-// @Tags system
-// @Produce json
-// @Success 200 {object} response.Envelope
-// @Router / [get]
+// @Summary      API welcome
+// @Description  Returns a short welcome payload for the v1 API root
+// @Tags         system
+// @Produce      json
+// @Success      200 {object} WelcomeResponse
+// @Router       /api/v1/ [get]
 func (h *WelcomeHandler) Welcome(c *gin.Context) {
 	response.OK(c, gin.H{
 		"message": "Welcome to Asnakech School API",
