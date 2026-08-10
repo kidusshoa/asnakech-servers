@@ -16,6 +16,8 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - `GET /ready` readiness probe (Postgres, Redis, S3 endpoint when configured)
 - Docker multi-stage `Dockerfile` and `docker-compose.yml` (API, Postgres, Redis, MinIO)
 - Air hot-reload (`.air.toml`) and Makefile targets: `tools`, `up`, `up-infra`, `down`, `logs`
+- PostgreSQL migrations (golang-migrate), `roles` table + seed, schema conventions in `docs/db/`
+- Shared pgx pool, role repository/service, and `GET /api/v1/roles`
 
 ### Changed
 

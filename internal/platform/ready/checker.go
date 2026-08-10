@@ -20,7 +20,9 @@ type Status struct {
 }
 
 // Checker pings configured infrastructure dependencies.
+// Prefer setting Pool when the app already holds a shared Postgres pool.
 type Checker struct {
+	Pool        *pgxpool.Pool
 	DatabaseURL string
 	RedisURL    string
 	S3Endpoint  string
@@ -52,12 +54,20 @@ func (c *Checker) Check(ctx context.Context) (statuses []Status, ok bool) {
 
 func (c *Checker) checkPostgres(ctx context.Context) Status {
 	name := "postgres"
-	if c.DatabaseURL == "" {
-		return Status{Name: name, Skipped: true, OK: true}
-	}
 
 	ctx, cancel := context.WithTimeout(ctx, c.timeout())
 	defer cancel()
+
+	if c.Pool != nil {
+		if err := c.Pool.Ping(ctx); err != nil {
+			return Status{Name: name, OK: false, Error: err.Error()}
+		}
+		return Status{Name: name, OK: true}
+	}
+
+	if c.DatabaseURL == "" {
+		return Status{Name: name, Skipped: true, OK: true}
+	}
 
 	pool, err := pgxpool.New(ctx, c.DatabaseURL)
 	if err != nil {

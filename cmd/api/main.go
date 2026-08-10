@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"os"
+	"time"
 
 	"github.com/asnakech/asnakech-servers/internal/config"
+	"github.com/asnakech/asnakech-servers/internal/database"
 	"github.com/asnakech/asnakech-servers/internal/logging"
 	"github.com/asnakech/asnakech-servers/internal/server"
 )
@@ -25,14 +28,27 @@ import (
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		// Logger not ready yet — fail fast to stderr.
 		_, _ = os.Stderr.WriteString("config error: " + err.Error() + "\n")
 		os.Exit(1)
 	}
 
 	logger := logging.Setup(cfg.Env, cfg.LogLevel)
 
-	srv := server.New(cfg, logger)
+	deps := server.Dependencies{}
+	if cfg.DatabaseURL != "" {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		pool, err := database.NewPostgresPool(ctx, cfg.DatabaseURL)
+		cancel()
+		if err != nil {
+			logger.Fatal().Err(err).Msg("postgres connection failed")
+		}
+		deps.DB = pool
+		logger.Info().Msg("postgres pool ready")
+	} else {
+		logger.Warn().Msg("DATABASE_URL not set — database features disabled")
+	}
+
+	srv := server.New(cfg, logger, deps)
 	if err := srv.Run(); err != nil {
 		logger.Fatal().Err(err).Msg("server error")
 	}

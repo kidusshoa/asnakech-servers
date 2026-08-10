@@ -75,6 +75,9 @@ func (c *Config) validate() error {
 	if c.Env == "production" && c.JWTSecret == "" {
 		return fmt.Errorf("JWT_SECRET is required when ENV=production")
 	}
+	if c.Env == "production" && c.DatabaseURL == "" {
+		return fmt.Errorf("DATABASE_URL is required when ENV=production")
+	}
 	return nil
 }
 

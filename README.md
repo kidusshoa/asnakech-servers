@@ -25,8 +25,9 @@ make tools   # optional: installs Air for hot-reload
 ### Running (API on host)
 
 ```bash
-make up-infra   # Postgres, Redis, MinIO
-make dev        # Air hot-reload, or go run fallback
+make up-infra          # Postgres, Redis, MinIO
+make migrate-up        # apply SQL migrations (roles seed)
+make tools && make dev # Air hot-reload, or go run fallback
 ```
 
 ### Running (full stack in Docker)
@@ -47,16 +48,21 @@ Server listens on `http://localhost:8080` by default. MinIO console: `http://loc
 ├── internal/
 │   ├── apperr/              # Typed application errors
 │   ├── config/              # Env + optional .env loading
+│   ├── database/            # Postgres pool helpers
 │   ├── domain/              # Business entities (growing)
 │   ├── handlers/            # HTTP handlers (thin)
 │   ├── logging/             # Zerolog setup
 │   ├── middleware/          # CORS, request ID, request logs
 │   ├── platform/ready/      # Dependency readiness checks
-│   ├── repository/          # Persistence interfaces (growing)
+│   ├── repository/          # Persistence interfaces
+│   │   └── postgres/        # Postgres implementations
 │   ├── response/            # Standard JSON envelope
 │   ├── server/              # HTTP server wiring & routes
-│   └── service/             # Use-cases / workflows (growing)
-├── docs/git/                # Contributing, branching, commits, releases
+│   └── service/             # Use-cases / workflows
+├── migrations/              # golang-migrate SQL (up/down)
+├── docs/
+│   ├── git/                 # Contributing, branching, commits, releases
+│   └── db/                  # Schema conventions
 ├── .github/                 # PR / issue templates, CODEOWNERS
 ├── Dockerfile
 ├── docker-compose.yml
@@ -92,6 +98,10 @@ Server listens on `http://localhost:8080` by default. MinIO console: `http://loc
 | `make up-infra` | Postgres + Redis + MinIO only |
 | `make down` | Stop Compose stack |
 | `make logs` | Follow API container logs |
+| `make migrate-up` | Apply all pending DB migrations |
+| `make migrate-down` | Roll back one migration |
+| `make migrate-version` | Show current migration version |
+| `make migrate-create NAME=…` | Scaffold a new migration pair |
 
 ## API Endpoints
 
@@ -100,6 +110,7 @@ Server listens on `http://localhost:8080` by default. MinIO console: `http://loc
 | `GET` | `/health` | Liveness / version |
 | `GET` | `/ready` | Readiness (Postgres, Redis, S3 when configured) |
 | `GET` | `/api/v1/` | Welcome stub |
+| `GET` | `/api/v1/roles` | List seeded platform roles (requires DB) |
 
 Responses use a shared envelope:
 
@@ -124,7 +135,7 @@ Every response includes an `X-Request-ID` header (generated if the client did no
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
 | `CORS_ALLOWED_ORIGINS` | `*` | Comma-separated origins |
 | `CORS_ALLOW_CREDENTIALS` | `false` | Must stay false when origin is `*` |
-| `DATABASE_URL` | _(empty)_ | Postgres URL; skipped in `/ready` if empty |
+| `DATABASE_URL` | _(empty)_ | Postgres URL; required in production; enables `/roles` |
 | `REDIS_URL` | _(empty)_ | Redis URL; skipped in `/ready` if empty |
 | `JWT_SECRET` | _(empty)_ | Required when `ENV=production` |
 | `JWT_ACCESS_TTL` | `15m` | Access token lifetime |

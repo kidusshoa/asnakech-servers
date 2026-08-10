@@ -39,9 +39,21 @@ func TestLoadDefaults(t *testing.T) {
 func TestLoadRequiresJWTInProduction(t *testing.T) {
 	t.Setenv("ENV", "production")
 	t.Setenv("JWT_SECRET", "")
+	t.Setenv("DATABASE_URL", "postgres://localhost/asnakech")
 
 	_, err := config.Load()
 	if err == nil {
 		t.Fatal("expected error when JWT_SECRET missing in production")
+	}
+}
+
+func TestLoadRequiresDatabaseInProduction(t *testing.T) {
+	t.Setenv("ENV", "production")
+	t.Setenv("JWT_SECRET", "secret")
+	t.Setenv("DATABASE_URL", "")
+
+	_, err := config.Load()
+	if err == nil {
+		t.Fatal("expected error when DATABASE_URL missing in production")
 	}
 }

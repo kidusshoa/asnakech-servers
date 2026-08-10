@@ -13,19 +13,28 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/handlers"
 	"github.com/asnakech/asnakech-servers/internal/middleware"
 	"github.com/asnakech/asnakech-servers/internal/platform/ready"
+	"github.com/asnakech/asnakech-servers/internal/repository/postgres"
+	"github.com/asnakech/asnakech-servers/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 )
+
+// Dependencies are optional infrastructure handles wired at startup.
+type Dependencies struct {
+	DB *pgxpool.Pool
+}
 
 // Server wraps the HTTP stack for the Asnakech API.
 type Server struct {
 	cfg    *config.Config
 	log    zerolog.Logger
+	deps   Dependencies
 	router *gin.Engine
 	http   *http.Server
 }
 
-func New(cfg *config.Config, logger zerolog.Logger) *Server {
+func New(cfg *config.Config, logger zerolog.Logger, deps Dependencies) *Server {
 	if cfg.Env == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	} else {
@@ -42,8 +51,9 @@ func New(cfg *config.Config, logger zerolog.Logger) *Server {
 	}))
 
 	s := &Server{
-		cfg:    cfg,
-		log:    logger,
+		cfg:  cfg,
+		log:  logger,
+		deps: deps,
 		router: router,
 		http: &http.Server{
 			Addr:         ":" + cfg.ServerPort,
@@ -60,6 +70,7 @@ func New(cfg *config.Config, logger zerolog.Logger) *Server {
 
 func (s *Server) registerRoutes() {
 	checker := &ready.Checker{
+		Pool:        s.deps.DB,
 		DatabaseURL: s.cfg.DatabaseURL,
 		RedisURL:    s.cfg.RedisURL,
 		S3Endpoint:  s.cfg.S3Endpoint,
@@ -74,6 +85,13 @@ func (s *Server) registerRoutes() {
 	v1 := s.router.Group("/api/v1")
 	{
 		v1.GET("/", welcomeHandler.Welcome)
+
+		if s.deps.DB != nil {
+			roleRepo := postgres.NewRoleRepository(s.deps.DB)
+			roleService := service.NewRoleService(roleRepo)
+			roleHandler := handlers.NewRoleHandler(roleService)
+			v1.GET("/roles", roleHandler.ListRoles)
+		}
 	}
 }
 
@@ -86,6 +104,7 @@ func (s *Server) Run() error {
 			Str("addr", "0.0.0.0:"+s.cfg.ServerPort).
 			Str("env", s.cfg.Env).
 			Str("version", s.cfg.AppVersion).
+			Bool("postgres", s.deps.DB != nil).
 			Msg("server starting")
 
 		if err := s.http.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -108,6 +127,11 @@ func (s *Server) Run() error {
 
 	if err := s.http.Shutdown(ctx); err != nil {
 		return fmt.Errorf("forced shutdown: %w", err)
+	}
+
+	if s.deps.DB != nil {
+		s.deps.DB.Close()
+		s.log.Info().Msg("postgres pool closed")
 	}
 
 	s.log.Info().Msg("server stopped")
