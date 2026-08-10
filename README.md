@@ -38,7 +38,9 @@ make up
 make logs
 ```
 
-Server listens on `http://localhost:8080` by default. MinIO console: `http://localhost:9001` (minioadmin / minioadmin).
+Server listens on `http://localhost:8080` by default. MinIO console defaults to `http://localhost:9011` (minioadmin / minioadmin).
+
+If Compose fails with **port is already allocated**, another stack is using that host port (e.g. Redis on `6379`). Change `REDIS_HOST_PORT` / `MINIO_*_HOST_PORT` / `POSTGRES_HOST_PORT` in `.env` and keep `REDIS_URL` / `S3_ENDPOINT` / `DATABASE_URL` in sync.
 
 ## Project Structure
 
