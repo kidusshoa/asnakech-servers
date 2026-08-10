@@ -20,6 +20,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Shared pgx pool, role repository/service, and `GET /api/v1/roles`
 - OpenAPI via swag: `docs/swagger/`, Swagger UI at `/swagger/index.html`, guides in `docs/api/`
 - Configurable Compose host ports (`REDIS_HOST_PORT`, `MINIO_*_HOST_PORT`, …) to avoid local conflicts
+- Auth: users + token tables, JWT access/refresh, register/login/refresh/logout/me, password reset & email verify stubs, auth rate limiting
 
 ### Changed
 

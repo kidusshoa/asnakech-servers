@@ -9,3 +9,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - OpenAPI/Swagger UI at `/swagger/index.html`
 - Documented envelope, versioning, and regeneration workflow
 - Endpoints: `GET /health`, `GET /ready`, `GET /api/v1/`, `GET /api/v1/roles`
+- Auth: register, login, refresh, logout, me, forgot/reset password, verify email

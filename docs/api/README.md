@@ -15,6 +15,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 |-----|-------|
 | [envelope.md](./envelope.md) | Success/error JSON shape |
 | [versioning.md](./versioning.md) | `/api/v1` policy |
+| [auth.md](./auth.md) | Register, login, JWT, password reset |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

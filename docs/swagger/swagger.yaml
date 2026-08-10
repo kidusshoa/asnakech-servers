@@ -1,5 +1,22 @@
 basePath: /
 definitions:
+  handlers.AuthSuccessData:
+    properties:
+      tokens:
+        $ref: '#/definitions/handlers.TokenPairResponse'
+      user:
+        $ref: '#/definitions/handlers.UserPublic'
+      verification_token:
+        type: string
+    type: object
+  handlers.AuthSuccessResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.AuthSuccessData'
+      success:
+        example: true
+        type: boolean
+    type: object
   handlers.ErrorResponse:
     properties:
       error:
@@ -23,6 +40,29 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/handlers.HealthData'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.MeResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.UserPublic'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.MessageData:
+    properties:
+      message:
+        type: string
+      reset_token:
+        type: string
+    type: object
+  handlers.MessageResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.MessageData'
       success:
         example: true
         type: boolean
@@ -73,6 +113,33 @@ definitions:
         example: true
         type: boolean
     type: object
+  handlers.TokenPairResponse:
+    properties:
+      access_token:
+        type: string
+      expires_at:
+        type: string
+      refresh_token:
+        type: string
+      token_type:
+        example: Bearer
+        type: string
+    type: object
+  handlers.UserPublic:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      full_name:
+        type: string
+      id:
+        type: string
+      role:
+        type: string
+    type: object
   handlers.WelcomeData:
     properties:
       message:
@@ -89,6 +156,73 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.forgotPasswordRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  handlers.loginRequest:
+    properties:
+      email:
+        example: student@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.logoutRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  handlers.refreshRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  handlers.registerRequest:
+    properties:
+      email:
+        example: student@example.com
+        type: string
+      full_name:
+        example: Ada Student
+        type: string
+      password:
+        example: password123
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  handlers.resetPasswordRequest:
+    properties:
+      new_password:
+        minLength: 8
+        type: string
+      token:
+        type: string
+    required:
+    - new_password
+    - token
+    type: object
+  handlers.verifyEmailRequest:
+    properties:
+      token:
+        type: string
+    required:
+    - token
     type: object
   ready.Status:
     properties:
@@ -149,6 +283,245 @@ paths:
       summary: API welcome
       tags:
       - system
+  /api/v1/auth/forgot-password:
+    post:
+      consumes:
+      - application/json
+      description: Request a password reset. Always returns a generic message. In
+        development may include reset_token.
+      parameters:
+      - description: Forgot password payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.forgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Forgot password
+      tags:
+      - auth
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate with email and password
+      parameters:
+      - description: Login payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.loginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AuthSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Login
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Revoke a refresh token
+      parameters:
+      - description: Logout payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.logoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Logout
+      tags:
+      - auth
+  /api/v1/auth/me:
+    get:
+      description: Return the authenticated user profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Current user
+      tags:
+      - auth
+  /api/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Rotate refresh token and issue a new access token
+      parameters:
+      - description: Refresh payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.refreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AuthSuccessResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Refresh tokens
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a student account and return access/refresh tokens. In development,
+        may include verification_token.
+      parameters:
+      - description: Registration payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.AuthSuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Register
+      tags:
+      - auth
+  /api/v1/auth/reset-password:
+    post:
+      consumes:
+      - application/json
+      description: Set a new password using a reset token
+      parameters:
+      - description: Reset password payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.resetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Reset password
+      tags:
+      - auth
+  /api/v1/auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Confirm email ownership with a verification token
+      parameters:
+      - description: Verify email payload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.verifyEmailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "429":
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Verify email
+      tags:
+      - auth
   /api/v1/roles:
     get:
       description: Returns seeded system roles (student, teacher, admin, parent).

@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/asnakech/asnakech-servers/internal/auth"
 	"github.com/asnakech/asnakech-servers/internal/config"
 	"github.com/asnakech/asnakech-servers/internal/handlers"
 	"github.com/asnakech/asnakech-servers/internal/middleware"
@@ -53,9 +54,9 @@ func New(cfg *config.Config, logger zerolog.Logger, deps Dependencies) *Server {
 	}))
 
 	s := &Server{
-		cfg:  cfg,
-		log:  logger,
-		deps: deps,
+		cfg:    cfg,
+		log:    logger,
+		deps:   deps,
 		router: router,
 		http: &http.Server{
 			Addr:         ":" + cfg.ServerPort,
@@ -91,9 +92,46 @@ func (s *Server) registerRoutes() {
 
 		if s.deps.DB != nil {
 			roleRepo := postgres.NewRoleRepository(s.deps.DB)
+			userRepo := postgres.NewUserRepository(s.deps.DB)
+			refreshRepo := postgres.NewRefreshTokenRepository(s.deps.DB)
+			resetRepo := postgres.NewPasswordResetTokenRepository(s.deps.DB)
+			verifyRepo := postgres.NewEmailVerificationTokenRepository(s.deps.DB)
+
 			roleService := service.NewRoleService(roleRepo)
 			roleHandler := handlers.NewRoleHandler(roleService)
 			v1.GET("/roles", roleHandler.ListRoles)
+
+			jwtSecret := s.cfg.JWTSecret
+			if jwtSecret == "" {
+				jwtSecret = "dev-only-change-me"
+				s.log.Warn().Msg("JWT_SECRET empty — using insecure development default")
+			}
+
+			tokenManager := auth.NewTokenManager(jwtSecret, s.cfg.JWTAccessTTL, s.cfg.JWTRefreshTTL)
+			authService := service.NewAuthService(
+				userRepo,
+				roleRepo,
+				refreshRepo,
+				resetRepo,
+				verifyRepo,
+				tokenManager,
+				s.cfg.IsDevelopment(),
+			)
+			authHandler := handlers.NewAuthHandler(authService)
+
+			authLimiter := middleware.NewIPRateLimiter(2, 10)
+			authGroup := v1.Group("/auth")
+			authGroup.Use(authLimiter.Limit())
+			{
+				authGroup.POST("/register", authHandler.Register)
+				authGroup.POST("/login", authHandler.Login)
+				authGroup.POST("/refresh", authHandler.Refresh)
+				authGroup.POST("/logout", authHandler.Logout)
+				authGroup.POST("/forgot-password", authHandler.ForgotPassword)
+				authGroup.POST("/reset-password", authHandler.ResetPassword)
+				authGroup.POST("/verify-email", authHandler.VerifyEmail)
+				authGroup.GET("/me", middleware.BearerAuth(tokenManager), authHandler.Me)
+			}
 		}
 	}
 }

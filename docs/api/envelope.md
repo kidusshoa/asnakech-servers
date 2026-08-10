@@ -31,6 +31,7 @@ Stable machine-readable `error.code` values (see `internal/apperr`):
 | `conflict` | 409 |
 | `internal_error` | 500 |
 | `not_ready` | 503 |
+| `rate_limited` | 429 |
 
 ## Request ID
 

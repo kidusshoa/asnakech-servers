@@ -10,12 +10,13 @@ import (
 type Code string
 
 const (
-	CodeInternal     Code = "internal_error"
-	CodeValidation   Code = "validation_error"
-	CodeUnauthorized Code = "unauthorized"
-	CodeForbidden    Code = "forbidden"
-	CodeNotFound     Code = "not_found"
-	CodeConflict     Code = "conflict"
+	CodeInternal      Code = "internal_error"
+	CodeValidation    Code = "validation_error"
+	CodeUnauthorized  Code = "unauthorized"
+	CodeForbidden     Code = "forbidden"
+	CodeNotFound      Code = "not_found"
+	CodeConflict      Code = "conflict"
+	CodeRateLimited   Code = "rate_limited"
 )
 
 // Error is the application-level error used across handlers and services.

@@ -118,8 +118,16 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `GET` | `/swagger/index.html` | Interactive OpenAPI (Swagger UI) |
 | `GET` | `/api/v1/` | Welcome stub |
 | `GET` | `/api/v1/roles` | List seeded platform roles (requires DB) |
+| `POST` | `/api/v1/auth/register` | Create account (student) |
+| `POST` | `/api/v1/auth/login` | Login |
+| `POST` | `/api/v1/auth/refresh` | Rotate tokens |
+| `POST` | `/api/v1/auth/logout` | Revoke refresh token |
+| `GET` | `/api/v1/auth/me` | Current user (Bearer) |
+| `POST` | `/api/v1/auth/forgot-password` | Request password reset |
+| `POST` | `/api/v1/auth/reset-password` | Set new password |
+| `POST` | `/api/v1/auth/verify-email` | Confirm email |
 
-Human-readable API guides: **[docs/api/](docs/api/README.md)**.
+Human-readable API guides: **[docs/api/](docs/api/README.md)** (see [auth.md](docs/api/auth.md)).
 
 Responses use a shared envelope:
 
