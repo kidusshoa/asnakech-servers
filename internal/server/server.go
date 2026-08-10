@@ -153,6 +153,35 @@ func (s *Server) registerRoutes() {
 				adminGroup.PATCH("/users/:id", userHandler.AdminUpdateUser)
 				adminGroup.DELETE("/users/:id", userHandler.AdminDeleteUser)
 			}
+
+			orgRepo := postgres.NewOrganizationRepository(s.deps.DB)
+			orgMemberRepo := postgres.NewOrganizationMemberRepository(s.deps.DB)
+			orgInviteRepo := postgres.NewOrganizationInviteRepository(s.deps.DB)
+			orgService := service.NewOrganizationService(
+				orgRepo,
+				orgMemberRepo,
+				orgInviteRepo,
+				userRepo,
+				s.cfg.IsDevelopment(),
+			)
+			orgHandler := handlers.NewOrganizationHandler(orgService)
+
+			orgsGroup := v1.Group("/organizations")
+			orgsGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				orgsGroup.POST("", middleware.RequirePermission(rbac.PermOrgsCreate), orgHandler.CreateOrganization)
+				orgsGroup.GET("", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.ListMyOrganizations)
+				orgsGroup.POST("/invites/accept", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.AcceptInvite)
+				orgsGroup.GET("/:id", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.GetOrganization)
+				orgsGroup.PATCH("/:id", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.UpdateOrganization)
+				orgsGroup.DELETE("/:id", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.DeleteOrganization)
+				orgsGroup.GET("/:id/members", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.ListMembers)
+				orgsGroup.PATCH("/:id/members/:userId", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.UpdateMemberRole)
+				orgsGroup.DELETE("/:id/members/:userId", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.RemoveMember)
+				orgsGroup.POST("/:id/invites", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.CreateInvite)
+				orgsGroup.GET("/:id/invites", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.ListInvites)
+				orgsGroup.DELETE("/:id/invites/:inviteId", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.RevokeInvite)
+			}
 		}
 	}
 }

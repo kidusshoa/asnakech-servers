@@ -11,3 +11,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Endpoints: `GET /health`, `GET /ready`, `GET /api/v1/`, `GET /api/v1/roles`
 - Auth: register, login, refresh, logout, me, forgot/reset password, verify email
 - Profiles + RBAC: `/users/me`, avatar hook, admin user CRUD, permission matrix
+- Organizations: create/list, members, invites/accept

@@ -14,6 +14,8 @@ const (
 	PermCoursesRead   Permission = "courses:read"
 	PermCoursesWrite  Permission = "courses:write"
 	PermCoursesManage Permission = "courses:manage"
+	PermOrgsCreate    Permission = "orgs:create"
+	PermOrgsRead      Permission = "orgs:read"
 )
 
 var rolePermissions = map[domain.RoleCode]map[Permission]struct{}{
@@ -22,6 +24,8 @@ var rolePermissions = map[domain.RoleCode]map[Permission]struct{}{
 		PermProfileWrite: {},
 		PermRolesRead:    {},
 		PermCoursesRead:  {},
+		PermOrgsCreate:   {},
+		PermOrgsRead:     {},
 	},
 	domain.RoleTeacher: {
 		PermProfileRead:  {},
@@ -29,12 +33,16 @@ var rolePermissions = map[domain.RoleCode]map[Permission]struct{}{
 		PermRolesRead:    {},
 		PermCoursesRead:  {},
 		PermCoursesWrite: {},
+		PermOrgsCreate:   {},
+		PermOrgsRead:     {},
 	},
 	domain.RoleParent: {
 		PermProfileRead:  {},
 		PermProfileWrite: {},
 		PermRolesRead:    {},
 		PermCoursesRead:  {},
+		PermOrgsCreate:   {},
+		PermOrgsRead:     {},
 	},
 	domain.RoleAdmin: {
 		PermProfileRead:   {},
@@ -45,6 +53,8 @@ var rolePermissions = map[domain.RoleCode]map[Permission]struct{}{
 		PermCoursesRead:   {},
 		PermCoursesWrite:  {},
 		PermCoursesManage: {},
+		PermOrgsCreate:    {},
+		PermOrgsRead:      {},
 	},
 }
 
@@ -81,6 +91,7 @@ func PermissionsFor(role domain.RoleCode) []Permission {
 		PermUsersRead, PermUsersManage,
 		PermRolesRead,
 		PermCoursesRead, PermCoursesWrite, PermCoursesManage,
+		PermOrgsCreate, PermOrgsRead,
 	}
 	sorted := make([]Permission, 0, len(out))
 	seen := map[Permission]struct{}{}

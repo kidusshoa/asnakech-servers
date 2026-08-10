@@ -17,6 +17,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 | [versioning.md](./versioning.md) | `/api/v1` policy |
 | [auth.md](./auth.md) | Register, login, JWT, password reset |
 | [rbac.md](./rbac.md) | Roles, permissions, admin APIs |
+| [organizations.md](./organizations.md) | Schools, members, invites |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

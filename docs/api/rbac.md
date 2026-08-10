@@ -23,6 +23,10 @@ Roles are stored in `roles` and assigned on `users.role_id`. Access tokens embed
 | `courses:read` | ✓ | ✓ | ✓ | ✓ |
 | `courses:write` | | ✓ | | ✓ |
 | `courses:manage` | | | | ✓ |
+| `orgs:create` | ✓ | ✓ | ✓ | ✓ |
+| `orgs:read` | ✓ | ✓ | ✓ | ✓ |
+
+Org-scoped actions (invite, update settings) additionally require membership `owner`/`admin` — see [organizations.md](./organizations.md).
 
 Source of truth: `internal/rbac/rbac.go`.
 
