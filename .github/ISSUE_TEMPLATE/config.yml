@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Git workflow questions
+    url: https://github.com/kidusshoa/asnakech-servers/blob/master/docs/git/README.md
+    about: Read branching, commits, and release docs before opening a process question.

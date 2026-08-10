@@ -43,7 +43,10 @@ Server listens on `http://localhost:8080` by default.
 │   ├── response/            # Standard JSON envelope
 │   ├── server/              # HTTP server wiring & routes
 │   └── service/             # Use-cases / workflows (growing)
+├── docs/git/                # Contributing, branching, commits, releases
+├── .github/                 # PR / issue templates, CODEOWNERS
 ├── .env.example
+├── CHANGELOG.md
 ├── go.mod
 ├── Makefile
 └── README.md
@@ -106,11 +109,16 @@ Expansion is tracked in 21 stages (architecture → production hardening), cover
 
 ## Contributing
 
-1. Create a feature branch from `master`
-2. Prefer Conventional Commits (`feat:`, `fix:`, `docs:`, …)
-3. Open a Pull Request
+See **[docs/git/](docs/git/README.md)** for the full workflow:
 
-Full git workflow docs land in Stage 2.
+- [Contributing](docs/git/CONTRIBUTING.md)
+- [Branching](docs/git/BRANCHING.md)
+- [Commit convention](docs/git/COMMIT_CONVENTION.md)
+- [Releases](docs/git/RELEASE.md)
+
+Short version: branch from `master` → Conventional Commits → PR (squash-merge).
+
+Notable changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

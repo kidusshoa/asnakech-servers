@@ -1,0 +1,42 @@
+name: Feature request
+description: Propose a new capability or API improvement
+title: "feat: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What user or platform need does this address?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the API or behavior you want
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Roadmap stage (if known)
+      options:
+        - Unsure / none
+        - Stage 3+ foundation
+        - Auth / users / RBAC
+        - Courses / curriculum
+        - Enrollment / progress
+        - Assessments
+        - Media / live / comms
+        - Payments / analytics
+        - Production hardening
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Links, mocks, related issues

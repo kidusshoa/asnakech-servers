@@ -1,0 +1,7 @@
+# Asnakech maintainers
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+*       @kidusshoa
+
+/docs/  @kidusshoa
+/.github/ @kidusshoa
