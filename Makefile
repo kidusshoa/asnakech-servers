@@ -1,12 +1,11 @@
-.PHONY: build run test clean
+.PHONY: all build run test clean deps install dev generate up down logs tidy fmt
 
-# Go parameters
 GOCMD=go
 GOBUILD=$(GOCMD) build
 GOCLEAN=$(GOCMD) clean
 GOTEST=$(GOCMD) test
-GOGET=$(GOCMD) get
 BINARY_NAME=asnakech-servers
+AIR_VERSION=v1.61.7
 
 all: test build
 
@@ -18,24 +17,52 @@ test:
 
 clean:
 	$(GOCLEAN)
-	rm -f bin/$(BINARY_NAME)
+	rm -rf bin/ tmp/
 
-run:
-	$(GOBUILD) -o bin/$(BINARY_NAME) ./cmd/api
+run: build
 	./bin/$(BINARY_NAME)
 
 deps:
-	$(GOGET) -u -t -v ./...
+	$(GOCMD) get -u -t -v ./...
+	$(GOCMD) mod tidy
 
-# Install dependencies
 install:
-	go mod download
+	$(GOCMD) mod download
 
-# Run the application in development mode
+# Hot-reload via Air when available; falls back to go run.
 dev:
-	echo "Starting development server..."
-	go run cmd/api/main.go
+	@if command -v air >/dev/null 2>&1; then \
+		air; \
+	else \
+		echo "air not found — using go run (install: make tools)"; \
+		$(GOCMD) run ./cmd/api; \
+	fi
 
-# Generate code (if you have any code generation steps)
+tools:
+	$(GOCMD) install github.com/air-verse/air@$(AIR_VERSION)
+
 generate:
-	go generate ./...
+	$(GOCMD) generate ./...
+
+tidy:
+	$(GOCMD) mod tidy
+
+fmt:
+	$(GOCMD) fmt ./...
+
+# Local infrastructure (Postgres, Redis, MinIO) + API
+up:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+# Infra only (run API via make dev on the host)
+up-infra:
+	docker compose up -d postgres redis minio minio-init
+
+logs:
+	docker compose logs -f api
+
+ps:
+	docker compose ps

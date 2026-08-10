@@ -11,6 +11,11 @@ versioning follows [Semantic Versioning](https://semver.org/).
 
 - Git collaboration docs under `docs/git/` (contributing, branching, commits, releases)
 - GitHub PR template, issue templates, and `CODEOWNERS`
+- `.env` loading via godotenv; config for DB, Redis, JWT, S3, and log level
+- Structured logging with zerolog (console in dev, JSON in production)
+- `GET /ready` readiness probe (Postgres, Redis, S3 endpoint when configured)
+- Docker multi-stage `Dockerfile` and `docker-compose.yml` (API, Postgres, Redis, MinIO)
+- Air hot-reload (`.air.toml`) and Makefile targets: `tools`, `up`, `up-infra`, `down`, `logs`
 
 ### Changed
 

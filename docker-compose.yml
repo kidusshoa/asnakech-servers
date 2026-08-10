@@ -1,0 +1,93 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: asnakech-api
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      PORT: "8080"
+      ENV: development
+      DATABASE_URL: postgres://asnakech:asnakech@postgres:5432/asnakech?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET: asnakech
+      S3_USE_PATH_STYLE: "true"
+      JWT_SECRET: ${JWT_SECRET:-dev-only-change-me}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_started
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: asnakech-postgres
+    environment:
+      POSTGRES_USER: asnakech
+      POSTGRES_PASSWORD: asnakech
+      POSTGRES_DB: asnakech
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U asnakech -d asnakech"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: asnakech-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio:latest
+    container_name: asnakech-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    restart: unless-stopped
+
+  # Creates the default bucket once MinIO is up.
+  minio-init:
+    image: minio/mc:latest
+    container_name: asnakech-minio-init
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      sleep 3;
+      mc alias set local http://minio:9000 minioadmin minioadmin;
+      mc mb --ignore-existing local/asnakech;
+      exit 0;
+      "
+    restart: "no"
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

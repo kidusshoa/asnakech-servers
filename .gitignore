@@ -22,6 +22,10 @@
 # Binaries
 bin/
 
+# Air / hot-reload
+tmp/
+build-errors.log
+
 # Coverage files
 coverage.txt
 coverage.out

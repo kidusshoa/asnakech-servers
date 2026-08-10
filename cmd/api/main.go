@@ -1,9 +1,10 @@
 package main
 
 import (
-	"log"
+	"os"
 
 	"github.com/asnakech/asnakech-servers/internal/config"
+	"github.com/asnakech/asnakech-servers/internal/logging"
 	"github.com/asnakech/asnakech-servers/internal/server"
 )
 
@@ -22,10 +23,17 @@ import (
 // @host      localhost:8080
 // @BasePath  /api/v1
 func main() {
-	cfg := config.Load()
+	cfg, err := config.Load()
+	if err != nil {
+		// Logger not ready yet — fail fast to stderr.
+		_, _ = os.Stderr.WriteString("config error: " + err.Error() + "\n")
+		os.Exit(1)
+	}
 
-	srv := server.New(cfg)
+	logger := logging.Setup(cfg.Env, cfg.LogLevel)
+
+	srv := server.New(cfg, logger)
 	if err := srv.Run(); err != nil {
-		log.Fatalf("server error: %v", err)
+		logger.Fatal().Err(err).Msg("server error")
 	}
 }
