@@ -17,6 +17,26 @@ definitions:
         example: true
         type: boolean
     type: object
+  handlers.AvatarIntentResponse:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.AvatarUploadIntent'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AvatarUploadIntent:
+    properties:
+      method:
+        example: PUT
+        type: string
+      note:
+        type: string
+      public_url:
+        type: string
+      upload_url:
+        type: string
+    type: object
   handlers.ErrorResponse:
     properties:
       error:
@@ -125,8 +145,24 @@ definitions:
         example: Bearer
         type: string
     type: object
+  handlers.UserListResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.UserPublic'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
   handlers.UserPublic:
     properties:
+      avatar_url:
+        type: string
+      bio:
+        type: string
       created_at:
         type: string
       email:
@@ -137,7 +173,17 @@ definitions:
         type: string
       id:
         type: string
+      is_active:
+        type: boolean
+      locale:
+        type: string
+      phone:
+        type: string
       role:
+        type: string
+      timezone:
+        type: string
+      updated_at:
         type: string
     type: object
   handlers.WelcomeData:
@@ -156,6 +202,16 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.adminUpdateUserRequest:
+    properties:
+      full_name:
+        type: string
+      is_active:
+        type: boolean
+      role:
+        example: teacher
+        type: string
     type: object
   handlers.forgotPasswordRequest:
     properties:
@@ -216,6 +272,27 @@ definitions:
     required:
     - new_password
     - token
+    type: object
+  handlers.setAvatarRequest:
+    properties:
+      avatar_url:
+        example: https://cdn.example.com/a.png
+        type: string
+    required:
+    - avatar_url
+    type: object
+  handlers.updateProfileRequest:
+    properties:
+      bio:
+        type: string
+      full_name:
+        type: string
+      locale:
+        type: string
+      phone:
+        type: string
+      timezone:
+        type: string
     type: object
   handlers.verifyEmailRequest:
     properties:
@@ -283,6 +360,159 @@ paths:
       summary: API welcome
       tags:
       - system
+  /api/v1/admin/users:
+    get:
+      description: Paginated user directory for administrators
+      parameters:
+      - default: 1
+        description: Page
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Page size
+        in: query
+        name: per_page
+        type: integer
+      - description: Filter by role code
+        in: query
+        name: role
+        type: string
+      - description: Search email or name
+        in: query
+        name: q
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserListResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List users (admin)
+      tags:
+      - admin
+  /api/v1/admin/users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Soft-delete user (admin)
+      tags:
+      - admin
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get user (admin)
+      tags:
+      - admin
+    patch:
+      consumes:
+      - application/json
+      description: Change role, active flag, or name
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Admin patch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.adminUpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update user (admin)
+      tags:
+      - admin
   /api/v1/auth/forgot-password:
     post:
       consumes:
@@ -540,6 +770,107 @@ paths:
       summary: List platform roles
       tags:
       - roles
+  /api/v1/users/me:
+    get:
+      description: Return the authenticated user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get my profile
+      tags:
+      - users
+    patch:
+      consumes:
+      - application/json
+      description: Patch profile fields for the authenticated user
+      parameters:
+      - description: Profile fields
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update my profile
+      tags:
+      - users
+  /api/v1/users/me/avatar:
+    put:
+      consumes:
+      - application/json
+      description: Temporary avatar hook until Stage 14 presigned uploads
+      parameters:
+      - description: Avatar URL
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.setAvatarRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MeResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Set my avatar URL
+      tags:
+      - users
+  /api/v1/users/me/avatar/upload-intent:
+    get:
+      description: Placeholder for future presigned upload flow
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AvatarIntentResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Avatar upload intent
+      tags:
+      - users
   /health:
     get:
       description: Returns OK when the process is running. Not under /api/v1.

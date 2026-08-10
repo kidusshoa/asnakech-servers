@@ -51,12 +51,19 @@ type verifyEmailRequest struct {
 }
 
 type UserPublic struct {
-	ID            string  `json:"id"`
-	Email         string  `json:"email"`
-	FullName      string  `json:"full_name"`
-	Role          string  `json:"role"`
-	EmailVerified bool    `json:"email_verified"`
+	ID            string    `json:"id"`
+	Email         string    `json:"email"`
+	FullName      string    `json:"full_name"`
+	Bio           string    `json:"bio"`
+	AvatarURL     string    `json:"avatar_url"`
+	Phone         string    `json:"phone"`
+	Locale        string    `json:"locale"`
+	Timezone      string    `json:"timezone"`
+	Role          string    `json:"role"`
+	EmailVerified bool      `json:"email_verified"`
+	IsActive      bool      `json:"is_active"`
 	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type TokenPairResponse struct {
@@ -317,8 +324,15 @@ func toUserPublic(user *domain.User) UserPublic {
 		ID:            user.ID,
 		Email:         user.Email,
 		FullName:      user.FullName,
+		Bio:           user.Bio,
+		AvatarURL:     user.AvatarURL,
+		Phone:         user.Phone,
+		Locale:        user.Locale,
+		Timezone:      user.Timezone,
 		Role:          string(user.RoleCode),
 		EmailVerified: user.EmailVerifiedAt != nil,
+		IsActive:      user.IsActive,
 		CreatedAt:     user.CreatedAt,
+		UpdatedAt:     user.UpdatedAt,
 	}
 }

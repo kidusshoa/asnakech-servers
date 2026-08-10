@@ -126,8 +126,11 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `POST` | `/api/v1/auth/forgot-password` | Request password reset |
 | `POST` | `/api/v1/auth/reset-password` | Set new password |
 | `POST` | `/api/v1/auth/verify-email` | Confirm email |
+| `GET/PATCH` | `/api/v1/users/me` | Profile (Bearer) |
+| `PUT` | `/api/v1/users/me/avatar` | Set avatar URL |
+| `GET` | `/api/v1/admin/users` | List users (admin) |
 
-Human-readable API guides: **[docs/api/](docs/api/README.md)** (see [auth.md](docs/api/auth.md)).
+Human-readable API guides: **[docs/api/](docs/api/README.md)** (see [auth.md](docs/api/auth.md), [rbac.md](docs/api/rbac.md)).
 
 Responses use a shared envelope:
 

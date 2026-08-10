@@ -1,0 +1,6 @@
+ALTER TABLE users
+    DROP COLUMN IF EXISTS bio,
+    DROP COLUMN IF EXISTS avatar_url,
+    DROP COLUMN IF EXISTS phone,
+    DROP COLUMN IF EXISTS locale,
+    DROP COLUMN IF EXISTS timezone;

@@ -14,6 +14,7 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/handlers"
 	"github.com/asnakech/asnakech-servers/internal/middleware"
 	"github.com/asnakech/asnakech-servers/internal/platform/ready"
+	"github.com/asnakech/asnakech-servers/internal/rbac"
 	"github.com/asnakech/asnakech-servers/internal/repository/postgres"
 	"github.com/asnakech/asnakech-servers/internal/service"
 	"github.com/gin-gonic/gin"
@@ -118,6 +119,8 @@ func (s *Server) registerRoutes() {
 				s.cfg.IsDevelopment(),
 			)
 			authHandler := handlers.NewAuthHandler(authService)
+			userService := service.NewUserService(userRepo, roleRepo)
+			userHandler := handlers.NewUserHandler(userService)
 
 			authLimiter := middleware.NewIPRateLimiter(2, 10)
 			authGroup := v1.Group("/auth")
@@ -131,6 +134,24 @@ func (s *Server) registerRoutes() {
 				authGroup.POST("/reset-password", authHandler.ResetPassword)
 				authGroup.POST("/verify-email", authHandler.VerifyEmail)
 				authGroup.GET("/me", middleware.BearerAuth(tokenManager), authHandler.Me)
+			}
+
+			usersGroup := v1.Group("/users")
+			usersGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				usersGroup.GET("/me", userHandler.GetMyProfile)
+				usersGroup.PATCH("/me", middleware.RequirePermission(rbac.PermProfileWrite), userHandler.UpdateMyProfile)
+				usersGroup.PUT("/me/avatar", middleware.RequirePermission(rbac.PermProfileWrite), userHandler.SetMyAvatar)
+				usersGroup.GET("/me/avatar/upload-intent", middleware.RequirePermission(rbac.PermProfileWrite), userHandler.AvatarUploadIntent)
+			}
+
+			adminGroup := v1.Group("/admin")
+			adminGroup.Use(middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermUsersManage))
+			{
+				adminGroup.GET("/users", userHandler.AdminListUsers)
+				adminGroup.GET("/users/:id", userHandler.AdminGetUser)
+				adminGroup.PATCH("/users/:id", userHandler.AdminUpdateUser)
+				adminGroup.DELETE("/users/:id", userHandler.AdminDeleteUser)
 			}
 		}
 	}

@@ -13,6 +13,11 @@ type UserRepository interface {
 	GetByID(ctx context.Context, id string) (*domain.User, error)
 	MarkEmailVerified(ctx context.Context, userID string, at time.Time) error
 	UpdatePasswordHash(ctx context.Context, userID, passwordHash string) error
+	UpdateProfile(ctx context.Context, userID string, patch domain.UserProfileUpdate) (*domain.User, error)
+	UpdateAvatarURL(ctx context.Context, userID, avatarURL string) (*domain.User, error)
+	List(ctx context.Context, filter domain.UserListFilter) ([]domain.User, int64, error)
+	AdminUpdate(ctx context.Context, userID string, patch domain.AdminUserUpdate, roleID *string) (*domain.User, error)
+	SoftDelete(ctx context.Context, userID string, at time.Time) error
 }
 
 type RefreshTokenRepository interface {

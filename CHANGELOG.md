@@ -21,6 +21,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - OpenAPI via swag: `docs/swagger/`, Swagger UI at `/swagger/index.html`, guides in `docs/api/`
 - Configurable Compose host ports (`REDIS_HOST_PORT`, `MINIO_*_HOST_PORT`, …) to avoid local conflicts
 - Auth: users + token tables, JWT access/refresh, register/login/refresh/logout/me, password reset & email verify stubs, auth rate limiting
+- Profiles + RBAC middleware, admin user management, `docs/api/rbac.md`
 
 ### Changed
 
