@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS course_tags;
+DROP TABLE IF EXISTS courses;
+DROP TABLE IF EXISTS tags;
+DROP TABLE IF EXISTS categories;

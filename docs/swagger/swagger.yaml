@@ -37,6 +37,102 @@ definitions:
       upload_url:
         type: string
     type: object
+  handlers.CategoryEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CategoryResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CategoryListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.CategoryResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CategoryResponse:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+    type: object
+  handlers.CourseEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CourseResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CourseListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.CourseResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CourseResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      cover_url:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      language:
+        type: string
+      level:
+        type: string
+      organization_id:
+        type: string
+      price_cents:
+        type: integer
+      published_at:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      teacher_id:
+        type: string
+      teacher_name:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handlers.ErrorResponse:
     properties:
       error:
@@ -311,6 +407,51 @@ definitions:
         example: teacher
         type: string
     type: object
+  handlers.createCategoryRequest:
+    properties:
+      description:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+    required:
+    - name
+    type: object
+  handlers.createCourseRequest:
+    properties:
+      category_id:
+        type: string
+      cover_url:
+        type: string
+      currency:
+        example: ETB
+        type: string
+      description:
+        type: string
+      language:
+        example: en
+        type: string
+      level:
+        example: beginner
+        type: string
+      organization_id:
+        type: string
+      price_cents:
+        type: integer
+      slug:
+        type: string
+      summary:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - title
+    type: object
   handlers.createInviteRequest:
     properties:
       email:
@@ -401,6 +542,36 @@ definitions:
         type: string
     required:
     - avatar_url
+    type: object
+  handlers.setTagsRequest:
+    properties:
+      tags:
+        items:
+          type: string
+        type: array
+    required:
+    - tags
+    type: object
+  handlers.updateCourseRequest:
+    properties:
+      category_id:
+        type: string
+      cover_url:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      language:
+        type: string
+      level:
+        type: string
+      price_cents:
+        type: integer
+      summary:
+        type: string
+      title:
+        type: string
     type: object
   handlers.updateMemberRoleRequest:
     properties:
@@ -890,6 +1061,245 @@ paths:
       summary: Verify email
       tags:
       - auth
+  /api/v1/categories:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CategoryListEnvelope'
+      summary: List categories
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Category
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CategoryEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create category
+      tags:
+      - courses
+  /api/v1/courses:
+    get:
+      description: Public catalog defaults to published. Teachers/admins may see drafts
+        they own (or all if admin).
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Page size
+        in: query
+        name: per_page
+        type: integer
+      - description: Search
+        in: query
+        name: q
+        type: string
+      - description: Category slug
+        in: query
+        name: category
+        type: string
+      - description: Tag slug
+        in: query
+        name: tag
+        type: string
+      - description: Organization ID
+        in: query
+        name: organization_id
+        type: string
+      - description: Teacher ID
+        in: query
+        name: teacher_id
+        type: string
+      - description: beginner|intermediate|advanced
+        in: query
+        name: level
+        type: string
+      - description: draft|published|archived
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseListEnvelope'
+      summary: List courses
+      tags:
+      - courses
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create course
+      tags:
+      - courses
+  /api/v1/courses/{id}:
+    delete:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Soft-delete course
+      tags:
+      - courses
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      summary: Get course
+      tags:
+      - courses
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Patch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateCourseRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update course
+      tags:
+      - courses
+  /api/v1/courses/{id}/archive:
+    post:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Archive course
+      tags:
+      - courses
+  /api/v1/courses/{id}/publish:
+    post:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Publish course
+      tags:
+      - courses
+  /api/v1/courses/{id}/tags:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Tags
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.setTagsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Replace course tags
+      tags:
+      - courses
   /api/v1/organizations:
     get:
       produces:

@@ -12,3 +12,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Auth: register, login, refresh, logout, me, forgot/reset password, verify email
 - Profiles + RBAC: `/users/me`, avatar hook, admin user CRUD, permission matrix
 - Organizations: create/list, members, invites/accept
+- Course catalog: categories, CRUD, tags, publish/archive, list filters

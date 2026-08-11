@@ -182,6 +182,31 @@ func (s *Server) registerRoutes() {
 				orgsGroup.GET("/:id/invites", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.ListInvites)
 				orgsGroup.DELETE("/:id/invites/:inviteId", middleware.RequirePermission(rbac.PermOrgsRead), orgHandler.RevokeInvite)
 			}
+
+			categoryRepo := postgres.NewCategoryRepository(s.deps.DB)
+			tagRepo := postgres.NewTagRepository(s.deps.DB)
+			courseRepo := postgres.NewCourseRepository(s.deps.DB)
+			courseService := service.NewCourseService(courseRepo, categoryRepo, tagRepo, orgRepo, orgMemberRepo)
+			courseHandler := handlers.NewCourseHandler(courseService)
+
+			v1.GET("/categories", courseHandler.ListCategories)
+			v1.POST("/categories",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesManage),
+				courseHandler.CreateCategory,
+			)
+
+			coursesGroup := v1.Group("/courses")
+			{
+				coursesGroup.GET("", middleware.OptionalBearerAuth(tokenManager), courseHandler.ListCourses)
+				coursesGroup.GET("/:id", middleware.OptionalBearerAuth(tokenManager), courseHandler.GetCourse)
+				coursesGroup.POST("", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.CreateCourse)
+				coursesGroup.PATCH("/:id", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.UpdateCourse)
+				coursesGroup.PUT("/:id/tags", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.SetCourseTags)
+				coursesGroup.POST("/:id/publish", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.PublishCourse)
+				coursesGroup.POST("/:id/archive", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.ArchiveCourse)
+				coursesGroup.DELETE("/:id", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.DeleteCourse)
+			}
 		}
 	}
 }

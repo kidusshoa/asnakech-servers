@@ -23,6 +23,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Auth: users + token tables, JWT access/refresh, register/login/refresh/logout/me, password reset & email verify stubs, auth rate limiting
 - Profiles + RBAC middleware, admin user management, `docs/api/rbac.md`
 - Organizations (schools): memberships, invites, org-scoped manage checks
+- Course catalog: categories/tags, draft→publish→archive, pricing metadata, filters
 
 ### Changed
 
