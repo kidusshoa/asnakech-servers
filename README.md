@@ -133,8 +133,9 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `POST` | `/api/v1/organizations/invites/accept` | Accept invite |
 | `GET` | `/api/v1/categories` | Course categories |
 | `GET/POST` | `/api/v1/courses` | Catalog list / create (teacher) |
+| `GET` | `/api/v1/courses/:id/curriculum` | Nested modules → lessons → blocks |
 
-Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md)).
+Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md), [curriculum](docs/api/curriculum.md)).
 
 Responses use a shared envelope:
 

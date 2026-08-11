@@ -13,3 +13,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Profiles + RBAC: `/users/me`, avatar hook, admin user CRUD, permission matrix
 - Organizations: create/list, members, invites/accept
 - Course catalog: categories, CRUD, tags, publish/archive, list filters
+- Curriculum: modules → lessons → content blocks, reorder, lesson publish

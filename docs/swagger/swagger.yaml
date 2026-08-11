@@ -68,6 +68,37 @@ definitions:
       slug:
         type: string
     type: object
+  handlers.ContentBlockEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.ContentBlockResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ContentBlockResponse:
+    properties:
+      block_type:
+        type: string
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      lesson_id:
+        type: string
+      media_url:
+        type: string
+      position:
+        type: integer
+      quiz_ref_id:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handlers.CourseEnvelope:
     properties:
       data:
@@ -133,6 +164,23 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.CurriculumTreeEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CurriculumTreeResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CurriculumTreeResponse:
+    properties:
+      course_id:
+        type: string
+      modules:
+        items:
+          $ref: '#/definitions/handlers.ModuleResponse'
+        type: array
+    type: object
   handlers.ErrorResponse:
     properties:
       error:
@@ -193,6 +241,43 @@ definitions:
       token:
         type: string
     type: object
+  handlers.LessonEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.LessonResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.LessonResponse:
+    properties:
+      blocks:
+        items:
+          $ref: '#/definitions/handlers.ContentBlockResponse'
+        type: array
+      created_at:
+        type: string
+      estimated_minutes:
+        type: integer
+      id:
+        type: string
+      module_id:
+        type: string
+      position:
+        type: integer
+      prerequisite_lesson_id:
+        type: string
+      slug:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handlers.MeResponse:
     properties:
       data:
@@ -238,6 +323,33 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.ModuleEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.ModuleResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ModuleResponse:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      lessons:
+        items:
+          $ref: '#/definitions/handlers.LessonResponse'
+        type: array
+      position:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
     type: object
   handlers.OrganizationEnvelope:
     properties:
@@ -407,6 +519,22 @@ definitions:
         example: teacher
         type: string
     type: object
+  handlers.createBlockRequest:
+    properties:
+      block_type:
+        example: text
+        type: string
+      body:
+        type: string
+      media_url:
+        type: string
+      quiz_ref_id:
+        type: string
+      title:
+        type: string
+    required:
+    - block_type
+    type: object
   handlers.createCategoryRequest:
     properties:
       description:
@@ -461,6 +589,28 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  handlers.createLessonRequest:
+    properties:
+      estimated_minutes:
+        type: integer
+      prerequisite_lesson_id:
+        type: string
+      slug:
+        type: string
+      summary:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
+  handlers.createModuleRequest:
+    properties:
+      title:
+        type: string
+    required:
+    - title
     type: object
   handlers.createOrgRequest:
     properties:
@@ -524,6 +674,15 @@ definitions:
     - email
     - password
     type: object
+  handlers.reorderRequest:
+    properties:
+      ids:
+        items:
+          type: string
+        type: array
+    required:
+    - ids
+    type: object
   handlers.resetPasswordRequest:
     properties:
       new_password:
@@ -552,6 +711,22 @@ definitions:
     required:
     - tags
     type: object
+  handlers.updateBlockRequest:
+    properties:
+      block_type:
+        example: text
+        type: string
+      body:
+        type: string
+      media_url:
+        type: string
+      quiz_ref_id:
+        type: string
+      title:
+        type: string
+    required:
+    - block_type
+    type: object
   handlers.updateCourseRequest:
     properties:
       category_id:
@@ -573,6 +748,19 @@ definitions:
       title:
         type: string
     type: object
+  handlers.updateLessonRequest:
+    properties:
+      estimated_minutes:
+        type: integer
+      prerequisite_lesson_id:
+        type: string
+      summary:
+        type: string
+      title:
+        type: string
+    required:
+    - title
+    type: object
   handlers.updateMemberRoleRequest:
     properties:
       role:
@@ -580,6 +768,13 @@ definitions:
         type: string
     required:
     - role
+    type: object
+  handlers.updateModuleRequest:
+    properties:
+      title:
+        type: string
+    required:
+    - title
     type: object
   handlers.updateOrgRequest:
     properties:
@@ -1061,6 +1256,53 @@ paths:
       summary: Verify email
       tags:
       - auth
+  /api/v1/blocks/{blockId}:
+    delete:
+      parameters:
+      - description: Block ID
+        in: path
+        name: blockId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete content block
+      tags:
+      - curriculum
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Block ID
+        in: path
+        name: blockId
+        required: true
+        type: string
+      - description: Block
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateBlockRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ContentBlockEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update content block
+      tags:
+      - curriculum
   /api/v1/categories:
     get:
       produces:
@@ -1252,6 +1494,80 @@ paths:
       summary: Archive course
       tags:
       - courses
+  /api/v1/courses/{id}/curriculum:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CurriculumTreeEnvelope'
+      summary: Get course curriculum tree
+      tags:
+      - curriculum
+  /api/v1/courses/{id}/modules:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Module
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.ModuleEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create module
+      tags:
+      - curriculum
+  /api/v1/courses/{id}/modules/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Ordered module IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.reorderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder modules
+      tags:
+      - curriculum
   /api/v1/courses/{id}/publish:
     post:
       parameters:
@@ -1300,6 +1616,252 @@ paths:
       summary: Replace course tags
       tags:
       - courses
+  /api/v1/lessons/{lessonId}:
+    delete:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete lesson
+      tags:
+      - curriculum
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Lesson
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LessonEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update lesson
+      tags:
+      - curriculum
+  /api/v1/lessons/{lessonId}/blocks:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Block
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createBlockRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.ContentBlockEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create content block
+      tags:
+      - curriculum
+  /api/v1/lessons/{lessonId}/blocks/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Ordered block IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.reorderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder content blocks in a lesson
+      tags:
+      - curriculum
+  /api/v1/lessons/{lessonId}/publish:
+    post:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LessonEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Publish lesson
+      tags:
+      - curriculum
+  /api/v1/lessons/{lessonId}/unpublish:
+    post:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LessonEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Unpublish lesson (back to draft)
+      tags:
+      - curriculum
+  /api/v1/modules/{moduleId}:
+    delete:
+      parameters:
+      - description: Module ID
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete module
+      tags:
+      - curriculum
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Module ID
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Module
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateModuleRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ModuleEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update module
+      tags:
+      - curriculum
+  /api/v1/modules/{moduleId}/lessons:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Module ID
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Lesson
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createLessonRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.LessonEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create lesson
+      tags:
+      - curriculum
+  /api/v1/modules/{moduleId}/lessons/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Module ID
+        in: path
+        name: moduleId
+        required: true
+        type: string
+      - description: Ordered lesson IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.reorderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder lessons in a module
+      tags:
+      - curriculum
   /api/v1/organizations:
     get:
       produces:

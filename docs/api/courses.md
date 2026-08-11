@@ -1,6 +1,6 @@
 # Course catalog
 
-Courses are catalog entries authored by teachers. Curriculum modules/lessons land in Stage 10.
+Courses are catalog entries authored by teachers. See [curriculum.md](./curriculum.md) for modules, lessons, and content blocks.
 
 ## Status lifecycle
 

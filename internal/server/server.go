@@ -189,6 +189,12 @@ func (s *Server) registerRoutes() {
 			courseService := service.NewCourseService(courseRepo, categoryRepo, tagRepo, orgRepo, orgMemberRepo)
 			courseHandler := handlers.NewCourseHandler(courseService)
 
+			moduleRepo := postgres.NewModuleRepository(s.deps.DB)
+			lessonRepo := postgres.NewLessonRepository(s.deps.DB)
+			blockRepo := postgres.NewContentBlockRepository(s.deps.DB)
+			curriculumService := service.NewCurriculumService(courseRepo, moduleRepo, lessonRepo, blockRepo)
+			curriculumHandler := handlers.NewCurriculumHandler(curriculumService)
+
 			v1.GET("/categories", courseHandler.ListCategories)
 			v1.POST("/categories",
 				middleware.BearerAuth(tokenManager),
@@ -206,6 +212,34 @@ func (s *Server) registerRoutes() {
 				coursesGroup.POST("/:id/publish", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.PublishCourse)
 				coursesGroup.POST("/:id/archive", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.ArchiveCourse)
 				coursesGroup.DELETE("/:id", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), courseHandler.DeleteCourse)
+
+				coursesGroup.GET("/:id/curriculum", middleware.OptionalBearerAuth(tokenManager), curriculumHandler.GetCurriculum)
+				coursesGroup.POST("/:id/modules", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.CreateModule)
+				coursesGroup.PUT("/:id/modules/reorder", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.ReorderModules)
+			}
+
+			modulesGroup := v1.Group("/modules")
+			{
+				modulesGroup.PATCH("/:moduleId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.UpdateModule)
+				modulesGroup.DELETE("/:moduleId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.DeleteModule)
+				modulesGroup.POST("/:moduleId/lessons", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.CreateLesson)
+				modulesGroup.PUT("/:moduleId/lessons/reorder", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.ReorderLessons)
+			}
+
+			lessonsGroup := v1.Group("/lessons")
+			{
+				lessonsGroup.PATCH("/:lessonId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.UpdateLesson)
+				lessonsGroup.POST("/:lessonId/publish", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.PublishLesson)
+				lessonsGroup.POST("/:lessonId/unpublish", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.UnpublishLesson)
+				lessonsGroup.DELETE("/:lessonId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.DeleteLesson)
+				lessonsGroup.POST("/:lessonId/blocks", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.CreateBlock)
+				lessonsGroup.PUT("/:lessonId/blocks/reorder", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.ReorderBlocks)
+			}
+
+			blocksGroup := v1.Group("/blocks")
+			{
+				blocksGroup.PATCH("/:blockId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.UpdateBlock)
+				blocksGroup.DELETE("/:blockId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.DeleteBlock)
 			}
 		}
 	}

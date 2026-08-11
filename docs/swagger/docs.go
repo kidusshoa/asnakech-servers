@@ -648,6 +648,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/blocks/{blockId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Delete content block",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Block ID",
+                        "name": "blockId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Update content block",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Block ID",
+                        "name": "blockId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Block",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.updateBlockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ContentBlockEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/categories": {
             "get": {
                 "produces": [
@@ -950,6 +1026,124 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/courses/{id}/curriculum": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Get course curriculum tree",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CurriculumTreeEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/modules": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Create module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Module",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.createModuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ModuleEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/modules/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Reorder modules",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Ordered module IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.reorderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{id}/publish": {
             "post": {
                 "security": [
@@ -1023,6 +1217,404 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.CourseEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{lessonId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Delete lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Update lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.updateLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LessonEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{lessonId}/blocks": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Create content block",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Block",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.createBlockRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ContentBlockEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{lessonId}/blocks/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Reorder content blocks in a lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Ordered block IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.reorderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{lessonId}/publish": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Publish lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LessonEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/lessons/{lessonId}/unpublish": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Unpublish lesson (back to draft)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LessonEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/modules/{moduleId}": {
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Delete module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "moduleId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Update module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "moduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Module",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.updateModuleRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ModuleEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/modules/{moduleId}/lessons": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Create lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "moduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Lesson",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.createLessonRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LessonEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/modules/{moduleId}/lessons/reorder": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "curriculum"
+                ],
+                "summary": "Reorder lessons in a module",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Module ID",
+                        "name": "moduleId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Ordered lesson IDs",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.reorderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
                         }
                     }
                 }
@@ -1873,6 +2465,53 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.ContentBlockEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.ContentBlockResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.ContentBlockResponse": {
+            "type": "object",
+            "properties": {
+                "block_type": {
+                    "type": "string"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "string"
+                },
+                "media_url": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "quiz_ref_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.CourseEnvelope": {
             "type": "object",
             "properties": {
@@ -1971,6 +2610,32 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CurriculumTreeEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.CurriculumTreeResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.CurriculumTreeResponse": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "modules": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.ModuleResponse"
+                    }
+                }
+            }
+        },
         "handlers.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -2061,6 +2726,62 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.LessonEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.LessonResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.LessonResponse": {
+            "type": "object",
+            "properties": {
+                "blocks": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.ContentBlockResponse"
+                    }
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "estimated_minutes": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "module_id": {
+                    "type": "string"
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "prerequisite_lesson_id": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.MeResponse": {
             "type": "object",
             "properties": {
@@ -2128,6 +2849,47 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "handlers.ModuleEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.ModuleResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.ModuleResponse": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lessons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.LessonResponse"
+                    }
+                },
+                "position": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -2382,6 +3144,30 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.createBlockRequest": {
+            "type": "object",
+            "required": [
+                "block_type"
+            ],
+            "properties": {
+                "block_type": {
+                    "type": "string",
+                    "example": "text"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "media_url": {
+                    "type": "string"
+                },
+                "quiz_ref_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.createCategoryRequest": {
             "type": "object",
             "required": [
@@ -2461,6 +3247,40 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "example": "member"
+                }
+            }
+        },
+        "handlers.createLessonRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "estimated_minutes": {
+                    "type": "integer"
+                },
+                "prerequisite_lesson_id": {
+                    "type": "string"
+                },
+                "slug": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.createModuleRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string"
                 }
             }
         },
@@ -2555,6 +3375,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.reorderRequest": {
+            "type": "object",
+            "required": [
+                "ids"
+            ],
+            "properties": {
+                "ids": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "handlers.resetPasswordRequest": {
             "type": "object",
             "required": [
@@ -2597,6 +3431,30 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.updateBlockRequest": {
+            "type": "object",
+            "required": [
+                "block_type"
+            ],
+            "properties": {
+                "block_type": {
+                    "type": "string",
+                    "example": "text"
+                },
+                "body": {
+                    "type": "string"
+                },
+                "media_url": {
+                    "type": "string"
+                },
+                "quiz_ref_id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.updateCourseRequest": {
             "type": "object",
             "properties": {
@@ -2629,6 +3487,26 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.updateLessonRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "estimated_minutes": {
+                    "type": "integer"
+                },
+                "prerequisite_lesson_id": {
+                    "type": "string"
+                },
+                "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.updateMemberRoleRequest": {
             "type": "object",
             "required": [
@@ -2638,6 +3516,17 @@ const docTemplate = `{
                 "role": {
                     "type": "string",
                     "example": "admin"
+                }
+            }
+        },
+        "handlers.updateModuleRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "title": {
+                    "type": "string"
                 }
             }
         },

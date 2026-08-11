@@ -24,6 +24,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Profiles + RBAC middleware, admin user management, `docs/api/rbac.md`
 - Organizations (schools): memberships, invites, org-scoped manage checks
 - Course catalog: categories/tags, draft→publish→archive, pricing metadata, filters
+- Curriculum: modules, lessons, content blocks (`text`/`video`/`file`/`quiz_ref`), reorder
 
 ### Changed
 
