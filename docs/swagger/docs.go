@@ -1463,6 +1463,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/courses/{id}/progress": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Get my progress on a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CourseProgressDetailEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{id}/publish": {
             "post": {
                 "security": [
@@ -1707,6 +1740,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/lessons/{lessonId}/progress": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Get my progress on a lesson",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LessonProgressEnvelope"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Upsert lesson progress (idempotent)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Lesson ID",
+                        "name": "lessonId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Progress",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.upsertLessonProgressRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpsertProgressEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/lessons/{lessonId}/publish": {
             "post": {
                 "security": [
@@ -1812,6 +1921,30 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.EnrollmentListEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/me/progress": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "summary": "Student progress dashboard",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.DashboardProgressEnvelope"
                         }
                     }
                 }
@@ -2937,6 +3070,76 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CourseProgressDetailData": {
+            "type": "object",
+            "properties": {
+                "course": {
+                    "$ref": "#/definitions/handlers.CourseProgressResponse"
+                },
+                "lessons": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.LessonProgressResponse"
+                    }
+                }
+            }
+        },
+        "handlers.CourseProgressDetailEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.CourseProgressDetailData"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.CourseProgressResponse": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "completed_lessons": {
+                    "type": "integer"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_slug": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "enrollment_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_lesson_id": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "integer"
+                },
+                "total_lessons": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.CourseResponse": {
             "type": "object",
             "properties": {
@@ -3037,6 +3240,68 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/handlers.ModuleResponse"
                     }
+                }
+            }
+        },
+        "handlers.DashboardProgressEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.DashboardProgressItem"
+                    }
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.DashboardProgressItem": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "completed_lessons": {
+                    "type": "integer"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_slug": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "enrollment_id": {
+                    "type": "string"
+                },
+                "enrollment_status": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_lesson_id": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "integer"
+                },
+                "total_lessons": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -3281,6 +3546,59 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "handlers.LessonProgressEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.LessonProgressResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.LessonProgressResponse": {
+            "type": "object",
+            "properties": {
+                "completed_at": {
+                    "type": "string"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "last_position": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "string"
+                },
+                "lesson_slug": {
+                    "type": "string"
+                },
+                "lesson_title": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
                 }
             }
         },
@@ -3574,6 +3892,29 @@ const docTemplate = `{
                 "token_type": {
                     "type": "string",
                     "example": "Bearer"
+                }
+            }
+        },
+        "handlers.UpsertProgressData": {
+            "type": "object",
+            "properties": {
+                "course": {
+                    "$ref": "#/definitions/handlers.CourseProgressResponse"
+                },
+                "lesson": {
+                    "$ref": "#/definitions/handlers.LessonProgressResponse"
+                }
+            }
+        },
+        "handlers.UpsertProgressEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.UpsertProgressData"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -4143,6 +4484,20 @@ const docTemplate = `{
                 },
                 "timezone": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.upsertLessonProgressRequest": {
+            "type": "object",
+            "properties": {
+                "completed": {
+                    "type": "boolean"
+                },
+                "last_position": {
+                    "type": "string"
+                },
+                "percent": {
+                    "type": "integer"
                 }
             }
         },

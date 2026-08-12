@@ -25,6 +25,7 @@ type LessonRepository interface {
 	Delete(ctx context.Context, id string) error
 	Reorder(ctx context.Context, moduleID string, orderedIDs []string) error
 	NextPosition(ctx context.Context, moduleID string) (int, error)
+	CountPublishedByCourse(ctx context.Context, courseID string) (int, error)
 }
 
 type ContentBlockRepository interface {

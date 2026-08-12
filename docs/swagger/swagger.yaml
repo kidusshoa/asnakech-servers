@@ -140,6 +140,52 @@ definitions:
         example: true
         type: boolean
     type: object
+  handlers.CourseProgressDetailData:
+    properties:
+      course:
+        $ref: '#/definitions/handlers.CourseProgressResponse'
+      lessons:
+        items:
+          $ref: '#/definitions/handlers.LessonProgressResponse'
+        type: array
+    type: object
+  handlers.CourseProgressDetailEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CourseProgressDetailData'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CourseProgressResponse:
+    properties:
+      completed_at:
+        type: string
+      completed_lessons:
+        type: integer
+      course_id:
+        type: string
+      course_slug:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      enrollment_id:
+        type: string
+      id:
+        type: string
+      last_lesson_id:
+        type: string
+      percent:
+        type: integer
+      total_lessons:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
+    type: object
   handlers.CourseResponse:
     properties:
       category_id:
@@ -207,6 +253,47 @@ definitions:
         items:
           $ref: '#/definitions/handlers.ModuleResponse'
         type: array
+    type: object
+  handlers.DashboardProgressEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.DashboardProgressItem'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.DashboardProgressItem:
+    properties:
+      completed_at:
+        type: string
+      completed_lessons:
+        type: integer
+      course_id:
+        type: string
+      course_slug:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      enrollment_id:
+        type: string
+      enrollment_status:
+        type: string
+      id:
+        type: string
+      last_lesson_id:
+        type: string
+      percent:
+        type: integer
+      total_lessons:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: string
     type: object
   handlers.EnrollmentEnvelope:
     properties:
@@ -369,6 +456,41 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.LessonProgressEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.LessonProgressResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.LessonProgressResponse:
+    properties:
+      completed_at:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      last_position:
+        type: string
+      lesson_id:
+        type: string
+      lesson_slug:
+        type: string
+      lesson_title:
+        type: string
+      percent:
+        type: integer
+      status:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: string
     type: object
   handlers.LessonResponse:
     properties:
@@ -564,6 +686,21 @@ definitions:
       token_type:
         example: Bearer
         type: string
+    type: object
+  handlers.UpsertProgressData:
+    properties:
+      course:
+        $ref: '#/definitions/handlers.CourseProgressResponse'
+      lesson:
+        $ref: '#/definitions/handlers.LessonProgressResponse'
+    type: object
+  handlers.UpsertProgressEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.UpsertProgressData'
+      success:
+        example: true
+        type: boolean
     type: object
   handlers.UserListResponse:
     properties:
@@ -941,6 +1078,15 @@ definitions:
         type: string
       timezone:
         type: string
+    type: object
+  handlers.upsertLessonProgressRequest:
+    properties:
+      completed:
+        type: boolean
+      last_position:
+        type: string
+      percent:
+        type: integer
     type: object
   handlers.verifyEmailRequest:
     properties:
@@ -1909,6 +2055,26 @@ paths:
       summary: Reorder modules
       tags:
       - curriculum
+  /api/v1/courses/{id}/progress:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseProgressDetailEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get my progress on a course
+      tags:
+      - progress
   /api/v1/courses/{id}/publish:
     post:
       parameters:
@@ -2060,6 +2226,53 @@ paths:
       summary: Reorder content blocks in a lesson
       tags:
       - curriculum
+  /api/v1/lessons/{lessonId}/progress:
+    get:
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LessonProgressEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get my progress on a lesson
+      tags:
+      - progress
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Lesson ID
+        in: path
+        name: lessonId
+        required: true
+        type: string
+      - description: Progress
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.upsertLessonProgressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UpsertProgressEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Upsert lesson progress (idempotent)
+      tags:
+      - progress
   /api/v1/lessons/{lessonId}/publish:
     post:
       parameters:
@@ -2127,6 +2340,20 @@ paths:
       summary: List my enrollments
       tags:
       - enrollments
+  /api/v1/me/progress:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DashboardProgressEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Student progress dashboard
+      tags:
+      - progress
   /api/v1/modules/{moduleId}:
     delete:
       parameters:

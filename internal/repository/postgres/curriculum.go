@@ -234,6 +234,19 @@ func (r *LessonRepository) Reorder(ctx context.Context, moduleID string, ordered
 	return reorderPositions(ctx, r.pool, "lessons", "module_id", moduleID, orderedIDs)
 }
 
+func (r *LessonRepository) CountPublishedByCourse(ctx context.Context, courseID string) (int, error) {
+	const q = `
+		SELECT COUNT(*)
+		FROM lessons l
+		JOIN course_modules m ON m.id = l.module_id
+		WHERE m.course_id = $1 AND l.status = 'published'`
+	var n int
+	if err := r.pool.QueryRow(ctx, q, courseID).Scan(&n); err != nil {
+		return 0, fmt.Errorf("count published lessons: %w", err)
+	}
+	return n, nil
+}
+
 func scanLesson(row scannable) (*domain.Lesson, error) {
 	var l domain.Lesson
 	var status string
