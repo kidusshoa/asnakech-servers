@@ -1,5 +1,130 @@
 basePath: /
 definitions:
+  handlers.AssignmentEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.AssignmentResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AssignmentListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.AssignmentResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AssignmentResponse:
+    properties:
+      allow_late:
+        type: boolean
+      course_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      due_at:
+        type: string
+      id:
+        type: string
+      max_score:
+        type: integer
+      rubric:
+        items:
+          $ref: '#/definitions/handlers.RubricCriterionResponse'
+        type: array
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.AttemptAnswerResponse:
+    properties:
+      attempt_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      is_correct:
+        type: boolean
+      points_awarded:
+        type: integer
+      question_id:
+        type: string
+      selected_option_ids:
+        items:
+          type: string
+        type: array
+      text_answer:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.AttemptEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.AttemptResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AttemptListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.AttemptResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AttemptResponse:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/handlers.AttemptAnswerResponse'
+        type: array
+      attempt_number:
+        type: integer
+      created_at:
+        type: string
+      graded_at:
+        type: string
+      id:
+        type: string
+      max_points:
+        type: integer
+      passed:
+        type: boolean
+      percent:
+        type: integer
+      quiz_id:
+        type: string
+      score_points:
+        type: integer
+      started_at:
+        type: string
+      status:
+        type: string
+      submitted_at:
+        type: string
+      updated_at:
+        type: string
+      user_email:
+        type: string
+      user_full_name:
+        type: string
+      user_id:
+        type: string
+    type: object
   handlers.AuthSuccessData:
     properties:
       tokens:
@@ -358,6 +483,59 @@ definitions:
         example: false
         type: boolean
     type: object
+  handlers.GradebookAssignmentScoreResponse:
+    properties:
+      assignment_id:
+        type: string
+      assignment_title:
+        type: string
+      max_score:
+        type: integer
+      score:
+        type: integer
+      status:
+        type: string
+    type: object
+  handlers.GradebookEntryResponse:
+    properties:
+      assignments:
+        items:
+          $ref: '#/definitions/handlers.GradebookAssignmentScoreResponse'
+        type: array
+      quizzes:
+        items:
+          $ref: '#/definitions/handlers.GradebookQuizScoreResponse'
+        type: array
+      user_email:
+        type: string
+      user_full_name:
+        type: string
+      user_id:
+        type: string
+    type: object
+  handlers.GradebookEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.GradebookEntryResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.GradebookQuizScoreResponse:
+    properties:
+      attempts:
+        type: integer
+      passed:
+        type: boolean
+      percent:
+        type: integer
+      quiz_id:
+        type: string
+      quiz_title:
+        type: string
+    type: object
   handlers.HealthData:
     properties:
       status:
@@ -629,6 +807,95 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.QuestionEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.QuestionResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.QuestionResponse:
+    properties:
+      correct_answer:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/handlers.QuizOptionResponse'
+        type: array
+      points:
+        type: integer
+      position:
+        type: integer
+      prompt:
+        type: string
+      question_type:
+        type: string
+      quiz_id:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.QuizEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.QuizResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.QuizListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.QuizResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.QuizOptionResponse:
+    properties:
+      id:
+        type: string
+      is_correct:
+        type: boolean
+      text:
+        type: string
+    type: object
+  handlers.QuizResponse:
+    properties:
+      course_id:
+        type: string
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: string
+      max_attempts:
+        type: integer
+      pass_percent:
+        type: integer
+      questions:
+        items:
+          $ref: '#/definitions/handlers.QuestionResponse'
+        type: array
+      shuffle_questions:
+        type: boolean
+      status:
+        type: string
+      time_limit_seconds:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handlers.ReadyData:
     properties:
       checks:
@@ -674,6 +941,70 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.RubricCriterionResponse:
+    properties:
+      criterion:
+        type: string
+      id:
+        type: string
+      max_points:
+        type: integer
+    type: object
+  handlers.SubmissionEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.SubmissionResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.SubmissionListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.SubmissionResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.SubmissionResponse:
+    properties:
+      assignment_id:
+        type: string
+      attachment_url:
+        type: string
+      body:
+        type: string
+      created_at:
+        type: string
+      feedback:
+        type: string
+      graded_at:
+        type: string
+      graded_by:
+        type: string
+      id:
+        type: string
+      rubric_scores:
+        additionalProperties:
+          type: integer
+        type: object
+      score:
+        type: integer
+      status:
+        type: string
+      submitted_at:
+        type: string
+      updated_at:
+        type: string
+      user_email:
+        type: string
+      user_full_name:
+        type: string
+      user_id:
+        type: string
     type: object
   handlers.TokenPairResponse:
     properties:
@@ -767,6 +1098,24 @@ definitions:
     required:
     - token
     type: object
+  handlers.addQuestionRequest:
+    properties:
+      correct_answer:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/handlers.quizOptionRequest'
+        type: array
+      points:
+        type: integer
+      prompt:
+        type: string
+      question_type:
+        type: string
+    required:
+    - prompt
+    - question_type
+    type: object
   handlers.adminUpdateUserRequest:
     properties:
       full_name:
@@ -776,6 +1125,25 @@ definitions:
       role:
         example: teacher
         type: string
+    type: object
+  handlers.createAssignmentRequest:
+    properties:
+      allow_late:
+        type: boolean
+      description:
+        type: string
+      due_at:
+        type: string
+      max_score:
+        type: integer
+      rubric:
+        items:
+          $ref: '#/definitions/handlers.rubricCriterionRequest'
+        type: array
+      title:
+        type: string
+    required:
+    - title
     type: object
   handlers.createBlockRequest:
     properties:
@@ -892,6 +1260,23 @@ definitions:
     required:
     - name
     type: object
+  handlers.createQuizRequest:
+    properties:
+      description:
+        type: string
+      max_attempts:
+        type: integer
+      pass_percent:
+        type: integer
+      shuffle_questions:
+        type: boolean
+      time_limit_seconds:
+        type: integer
+      title:
+        type: string
+    required:
+    - title
+    type: object
   handlers.enrollRequest:
     properties:
       invite_code:
@@ -913,6 +1298,17 @@ definitions:
     required:
     - email
     type: object
+  handlers.gradeSubmissionRequest:
+    properties:
+      feedback:
+        type: string
+      rubric_scores:
+        additionalProperties:
+          type: integer
+        type: object
+      score:
+        type: integer
+    type: object
   handlers.loginRequest:
     properties:
       email:
@@ -931,6 +1327,15 @@ definitions:
         type: string
     required:
     - refresh_token
+    type: object
+  handlers.quizOptionRequest:
+    properties:
+      id:
+        type: string
+      is_correct:
+        type: boolean
+      text:
+        type: string
     type: object
   handlers.refreshRequest:
     properties:
@@ -975,6 +1380,37 @@ definitions:
     - new_password
     - token
     type: object
+  handlers.rubricCriterionRequest:
+    properties:
+      criterion:
+        type: string
+      id:
+        type: string
+      max_points:
+        type: integer
+    type: object
+  handlers.saveAnswerItem:
+    properties:
+      question_id:
+        type: string
+      selected_option_ids:
+        items:
+          type: string
+        type: array
+      text_answer:
+        type: string
+    required:
+    - question_id
+    type: object
+  handlers.saveAnswersRequest:
+    properties:
+      answers:
+        items:
+          $ref: '#/definitions/handlers.saveAnswerItem'
+        type: array
+    required:
+    - answers
+    type: object
   handlers.setAvatarRequest:
     properties:
       avatar_url:
@@ -991,6 +1427,23 @@ definitions:
         type: array
     required:
     - tags
+    type: object
+  handlers.updateAssignmentRequest:
+    properties:
+      allow_late:
+        type: boolean
+      description:
+        type: string
+      due_at:
+        type: string
+      max_score:
+        type: integer
+      rubric:
+        items:
+          $ref: '#/definitions/handlers.rubricCriterionRequest'
+        type: array
+      title:
+        type: string
     type: object
   handlers.updateBlockRequest:
     properties:
@@ -1079,6 +1532,36 @@ definitions:
       timezone:
         type: string
     type: object
+  handlers.updateQuestionRequest:
+    properties:
+      correct_answer:
+        type: string
+      options:
+        items:
+          $ref: '#/definitions/handlers.quizOptionRequest'
+        type: array
+      points:
+        type: integer
+      prompt:
+        type: string
+    required:
+    - prompt
+    type: object
+  handlers.updateQuizRequest:
+    properties:
+      description:
+        type: string
+      max_attempts:
+        type: integer
+      pass_percent:
+        type: integer
+      shuffle_questions:
+        type: boolean
+      time_limit_seconds:
+        type: integer
+      title:
+        type: string
+    type: object
   handlers.upsertLessonProgressRequest:
     properties:
       completed:
@@ -1087,6 +1570,15 @@ definitions:
         type: string
       percent:
         type: integer
+    type: object
+  handlers.upsertSubmissionRequest:
+    properties:
+      attachment_url:
+        type: string
+      body:
+        type: string
+      submit:
+        type: boolean
     type: object
   handlers.verifyEmailRequest:
     properties:
@@ -1307,6 +1799,208 @@ paths:
       summary: Update user (admin)
       tags:
       - admin
+  /api/v1/assignments/{assignmentId}:
+    get:
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AssignmentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get assignment
+      tags:
+      - assessments
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      - description: Assignment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AssignmentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update assignment
+      tags:
+      - assessments
+  /api/v1/assignments/{assignmentId}/publish:
+    post:
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AssignmentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Publish assignment
+      tags:
+      - assessments
+  /api/v1/assignments/{assignmentId}/submission:
+    get:
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SubmissionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get my assignment submission
+      tags:
+      - assessments
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      - description: Submission
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.upsertSubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SubmissionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create or update my assignment submission
+      tags:
+      - assessments
+  /api/v1/assignments/{assignmentId}/submissions:
+    get:
+      parameters:
+      - description: Assignment ID
+        in: path
+        name: assignmentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SubmissionListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List assignment submissions (teacher)
+      tags:
+      - assessments
+  /api/v1/attempts/{attemptId}:
+    get:
+      parameters:
+      - description: Attempt ID
+        in: path
+        name: attemptId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttemptEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get quiz attempt
+      tags:
+      - assessments
+  /api/v1/attempts/{attemptId}/answers:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Attempt ID
+        in: path
+        name: attemptId
+        required: true
+        type: string
+      - description: Answers
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.saveAnswersRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttemptEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Save quiz attempt answers
+      tags:
+      - assessments
+  /api/v1/attempts/{attemptId}/submit:
+    post:
+      parameters:
+      - description: Attempt ID
+        in: path
+        name: attemptId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttemptEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Submit quiz attempt
+      tags:
+      - assessments
   /api/v1/auth/forgot-password:
     post:
       consumes:
@@ -1804,6 +2498,53 @@ paths:
       summary: Archive course
       tags:
       - courses
+  /api/v1/courses/{id}/assignments:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AssignmentListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List assignments for a course
+      tags:
+      - assessments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Assignment
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createAssignmentRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.AssignmentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create assignment
+      tags:
+      - assessments
   /api/v1/courses/{id}/curriculum:
     get:
       parameters:
@@ -1928,6 +2669,26 @@ paths:
       summary: List enrollments for a course
       tags:
       - enrollments
+  /api/v1/courses/{id}/gradebook:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.GradebookEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Course gradebook
+      tags:
+      - assessments
   /api/v1/courses/{id}/invite-codes:
     get:
       parameters:
@@ -2095,6 +2856,53 @@ paths:
       summary: Publish course
       tags:
       - courses
+  /api/v1/courses/{id}/quizzes:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.QuizListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List quizzes for a course
+      tags:
+      - assessments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Quiz
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createQuizRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.QuizEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create quiz
+      tags:
+      - assessments
   /api/v1/courses/{id}/tags:
     put:
       consumes:
@@ -2774,6 +3582,215 @@ paths:
       summary: Accept organization invite
       tags:
       - organizations
+  /api/v1/questions/{questionId}:
+    delete:
+      parameters:
+      - description: Question ID
+        in: path
+        name: questionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete quiz question
+      tags:
+      - assessments
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Question ID
+        in: path
+        name: questionId
+        required: true
+        type: string
+      - description: Question
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.QuestionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update quiz question
+      tags:
+      - assessments
+  /api/v1/quizzes/{quizId}:
+    get:
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.QuizEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get quiz with questions
+      tags:
+      - assessments
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      - description: Quiz
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateQuizRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.QuizEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update quiz
+      tags:
+      - assessments
+  /api/v1/quizzes/{quizId}/attempts:
+    get:
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttemptListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List my quiz attempts
+      tags:
+      - assessments
+    post:
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.AttemptEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Start quiz attempt
+      tags:
+      - assessments
+  /api/v1/quizzes/{quizId}/publish:
+    post:
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.QuizEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Publish quiz
+      tags:
+      - assessments
+  /api/v1/quizzes/{quizId}/questions:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      - description: Question
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.addQuestionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.QuestionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Add question to quiz
+      tags:
+      - assessments
+  /api/v1/quizzes/{quizId}/questions/reorder:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Quiz ID
+        in: path
+        name: quizId
+        required: true
+        type: string
+      - description: Ordered question IDs
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.reorderRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Reorder quiz questions
+      tags:
+      - assessments
   /api/v1/roles:
     get:
       description: Returns seeded system roles (student, teacher, admin, parent).
@@ -2792,6 +3809,34 @@ paths:
       summary: List platform roles
       tags:
       - roles
+  /api/v1/submissions/{submissionId}/grade:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Submission ID
+        in: path
+        name: submissionId
+        required: true
+        type: string
+      - description: Grade
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.gradeSubmissionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SubmissionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Grade assignment submission
+      tags:
+      - assessments
   /api/v1/users/me:
     get:
       description: Return the authenticated user's profile

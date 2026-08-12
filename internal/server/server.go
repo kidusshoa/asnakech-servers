@@ -206,6 +206,17 @@ func (s *Server) registerRoutes() {
 			)
 			progressHandler := handlers.NewProgressHandler(progressService)
 
+			quizRepo := postgres.NewQuizRepository(s.deps.DB)
+			questionRepo := postgres.NewQuizQuestionRepository(s.deps.DB)
+			attemptRepo := postgres.NewQuizAttemptRepository(s.deps.DB)
+			answerRepo := postgres.NewQuizAttemptAnswerRepository(s.deps.DB)
+			assignmentRepo := postgres.NewAssignmentRepository(s.deps.DB)
+			submissionRepo := postgres.NewAssignmentSubmissionRepository(s.deps.DB)
+			assessmentService := service.NewAssessmentService(
+				courseRepo, enrollmentRepo, quizRepo, questionRepo, attemptRepo, answerRepo, assignmentRepo, submissionRepo,
+			)
+			assessmentHandler := handlers.NewAssessmentHandler(assessmentService)
+
 			v1.GET("/categories", courseHandler.ListCategories)
 			v1.POST("/categories",
 				middleware.BearerAuth(tokenManager),
@@ -249,6 +260,51 @@ func (s *Server) registerRoutes() {
 				coursesGroup.DELETE("/:id/invite-codes/:codeId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), enrollmentHandler.RevokeInviteCode)
 
 				coursesGroup.GET("/:id/progress", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), progressHandler.GetCourseProgress)
+
+				coursesGroup.POST("/:id/quizzes", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.CreateQuiz)
+				coursesGroup.GET("/:id/quizzes", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.ListQuizzes)
+				coursesGroup.POST("/:id/assignments", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.CreateAssignment)
+				coursesGroup.GET("/:id/assignments", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.ListAssignments)
+				coursesGroup.GET("/:id/gradebook", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.Gradebook)
+			}
+
+			quizzesGroup := v1.Group("/quizzes")
+			{
+				quizzesGroup.GET("/:quizId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.GetQuiz)
+				quizzesGroup.PATCH("/:quizId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.UpdateQuiz)
+				quizzesGroup.POST("/:quizId/publish", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.PublishQuiz)
+				quizzesGroup.POST("/:quizId/questions", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.AddQuestion)
+				quizzesGroup.PUT("/:quizId/questions/reorder", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.ReorderQuestions)
+				quizzesGroup.POST("/:quizId/attempts", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.StartAttempt)
+				quizzesGroup.GET("/:quizId/attempts", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.ListMyAttempts)
+			}
+
+			questionsGroup := v1.Group("/questions")
+			{
+				questionsGroup.PATCH("/:questionId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.UpdateQuestion)
+				questionsGroup.DELETE("/:questionId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.DeleteQuestion)
+			}
+
+			attemptsGroup := v1.Group("/attempts")
+			{
+				attemptsGroup.GET("/:attemptId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.GetAttempt)
+				attemptsGroup.PUT("/:attemptId/answers", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.SaveAnswers)
+				attemptsGroup.POST("/:attemptId/submit", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.SubmitAttempt)
+			}
+
+			assignmentsGroup := v1.Group("/assignments")
+			{
+				assignmentsGroup.GET("/:assignmentId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.GetAssignment)
+				assignmentsGroup.PATCH("/:assignmentId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.UpdateAssignment)
+				assignmentsGroup.POST("/:assignmentId/publish", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.PublishAssignment)
+				assignmentsGroup.PUT("/:assignmentId/submission", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.UpsertSubmission)
+				assignmentsGroup.GET("/:assignmentId/submission", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.GetMySubmission)
+				assignmentsGroup.GET("/:assignmentId/submissions", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.ListSubmissions)
+			}
+
+			submissionsGroup := v1.Group("/submissions")
+			{
+				submissionsGroup.POST("/:submissionId/grade", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.GradeSubmission)
 			}
 
 			modulesGroup := v1.Group("/modules")

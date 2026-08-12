@@ -22,6 +22,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 | [curriculum.md](./curriculum.md) | Modules, lessons, content blocks |
 | [enrollment.md](./enrollment.md) | Enroll, capacity, invite codes, access |
 | [progress.md](./progress.md) | Lesson/course progress, completion |
+| [assessments.md](./assessments.md) | Quizzes, assignments, gradebook |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

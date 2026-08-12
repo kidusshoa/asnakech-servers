@@ -16,3 +16,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Curriculum: modules → lessons → content blocks, reorder, lesson publish
 - Enrollments: self enroll/unenroll, capacity/waitlist, invite codes, content access gate
 - Progress: lesson upsert (idempotent), course %, completion, student dashboard
+- Assessments: MCQ/short-answer quizzes, assignments + rubric, auto/manual grade, gradebook

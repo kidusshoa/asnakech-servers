@@ -20,7 +20,7 @@ Lesson status is independent of course publish: `draft` → `published`. Enrollm
 | `text` | `body` |
 | `video` | `media_url`, optional `title`/`body` |
 | `file` | `media_url`, optional `title` |
-| `quiz_ref` | `quiz_ref_id` (stub until assessments stage) |
+| `quiz_ref` | `quiz_ref_id` (links to a quiz — see [assessments.md](./assessments.md)) |
 
 ## Endpoints
 

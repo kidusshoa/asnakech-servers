@@ -27,6 +27,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Curriculum: modules, lessons, content blocks (`text`/`video`/`file`/`quiz_ref`), reorder
 - Enrollments: active/waitlisted/cancelled, invite codes, capacity, waitlist promotion, enrollment events
 - Progress: lesson progress + course aggregates, prerequisites, idempotent upserts, `/me/progress` dashboard
+- Assessments: quizzes (MCQ/short answer, attempts, auto-grade), assignments (submissions, rubric), gradebook
 
 ### Changed
 
