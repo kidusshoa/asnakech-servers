@@ -192,7 +192,11 @@ func (s *Server) registerRoutes() {
 			moduleRepo := postgres.NewModuleRepository(s.deps.DB)
 			lessonRepo := postgres.NewLessonRepository(s.deps.DB)
 			blockRepo := postgres.NewContentBlockRepository(s.deps.DB)
-			curriculumService := service.NewCurriculumService(courseRepo, moduleRepo, lessonRepo, blockRepo)
+			enrollmentRepo := postgres.NewEnrollmentRepository(s.deps.DB)
+			inviteCodeRepo := postgres.NewEnrollmentInviteCodeRepository(s.deps.DB)
+			enrollmentService := service.NewEnrollmentService(courseRepo, enrollmentRepo, inviteCodeRepo)
+			enrollmentHandler := handlers.NewEnrollmentHandler(enrollmentService)
+			curriculumService := service.NewCurriculumService(courseRepo, moduleRepo, lessonRepo, blockRepo, enrollmentService)
 			curriculumHandler := handlers.NewCurriculumHandler(curriculumService)
 
 			v1.GET("/categories", courseHandler.ListCategories)
@@ -200,6 +204,12 @@ func (s *Server) registerRoutes() {
 				middleware.BearerAuth(tokenManager),
 				middleware.RequirePermission(rbac.PermCoursesManage),
 				courseHandler.CreateCategory,
+			)
+
+			v1.GET("/me/enrollments",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesRead),
+				enrollmentHandler.ListMyEnrollments,
 			)
 
 			coursesGroup := v1.Group("/courses")
@@ -216,6 +226,15 @@ func (s *Server) registerRoutes() {
 				coursesGroup.GET("/:id/curriculum", middleware.OptionalBearerAuth(tokenManager), curriculumHandler.GetCurriculum)
 				coursesGroup.POST("/:id/modules", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.CreateModule)
 				coursesGroup.PUT("/:id/modules/reorder", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), curriculumHandler.ReorderModules)
+
+				coursesGroup.POST("/:id/enroll", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), enrollmentHandler.Enroll)
+				coursesGroup.DELETE("/:id/enroll", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), enrollmentHandler.Unenroll)
+				coursesGroup.GET("/:id/enrollments", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), enrollmentHandler.ListCourseEnrollments)
+				coursesGroup.GET("/:id/access", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), enrollmentHandler.GetCourseAccess)
+				coursesGroup.PATCH("/:id/enrollment-settings", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), enrollmentHandler.UpdateEnrollmentSettings)
+				coursesGroup.POST("/:id/invite-codes", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), enrollmentHandler.CreateInviteCode)
+				coursesGroup.GET("/:id/invite-codes", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), enrollmentHandler.ListInviteCodes)
+				coursesGroup.DELETE("/:id/invite-codes/:codeId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), enrollmentHandler.RevokeInviteCode)
 			}
 
 			modulesGroup := v1.Group("/modules")

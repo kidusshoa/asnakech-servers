@@ -25,6 +25,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Organizations (schools): memberships, invites, org-scoped manage checks
 - Course catalog: categories/tags, draft→publish→archive, pricing metadata, filters
 - Curriculum: modules, lessons, content blocks (`text`/`video`/`file`/`quiz_ref`), reorder
+- Enrollments: active/waitlisted/cancelled, invite codes, capacity, waitlist promotion, enrollment events
 
 ### Changed
 

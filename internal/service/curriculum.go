@@ -10,10 +10,11 @@ import (
 )
 
 type CurriculumService struct {
-	courses repository.CourseRepository
-	modules repository.ModuleRepository
-	lessons repository.LessonRepository
-	blocks  repository.ContentBlockRepository
+	courses     repository.CourseRepository
+	modules     repository.ModuleRepository
+	lessons     repository.LessonRepository
+	blocks      repository.ContentBlockRepository
+	enrollments *EnrollmentService
 }
 
 func NewCurriculumService(
@@ -21,12 +22,14 @@ func NewCurriculumService(
 	modules repository.ModuleRepository,
 	lessons repository.LessonRepository,
 	blocks repository.ContentBlockRepository,
+	enrollments *EnrollmentService,
 ) *CurriculumService {
 	return &CurriculumService{
-		courses: courses,
-		modules: modules,
-		lessons: lessons,
-		blocks:  blocks,
+		courses:     courses,
+		modules:     modules,
+		lessons:     lessons,
+		blocks:      blocks,
+		enrollments: enrollments,
 	}
 }
 
@@ -38,6 +41,15 @@ func (s *CurriculumService) GetTree(ctx context.Context, courseID, actorID strin
 	canAuthor := platformAdmin || (actorID != "" && course.TeacherID == actorID)
 	if course.Status != domain.CourseStatusPublished && !canAuthor {
 		return nil, apperr.NotFound("course not found")
+	}
+
+	includeBlocks := canAuthor
+	if !includeBlocks && s.enrollments != nil {
+		ok, err := s.enrollments.HasActiveEnrollment(ctx, courseID, actorID)
+		if err != nil {
+			return nil, err
+		}
+		includeBlocks = ok
 	}
 
 	modules, err := s.modules.ListByCourse(ctx, courseID)
@@ -56,11 +68,13 @@ func (s *CurriculumService) GetTree(ctx context.Context, courseID, actorID strin
 			if !canAuthor && lesson.Status != domain.LessonStatusPublished {
 				continue
 			}
-			blocks, err := s.blocks.ListByLesson(ctx, lesson.ID)
-			if err != nil {
-				return nil, err
+			if includeBlocks {
+				blocks, err := s.blocks.ListByLesson(ctx, lesson.ID)
+				if err != nil {
+					return nil, err
+				}
+				lesson.Blocks = blocks
 			}
-			lesson.Blocks = blocks
 			visible = append(visible, lesson)
 		}
 		mod.Lessons = visible

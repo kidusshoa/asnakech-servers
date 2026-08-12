@@ -27,6 +27,7 @@ const courseSelect = `
 	c.title, c.slug, c.summary, c.description, c.status, c.cover_url,
 	c.price_cents, c.currency, c.level, c.language, c.published_at,
 	c.created_at, c.updated_at,
+	c.enrollment_capacity, c.enrollment_open, c.waitlist_enabled,
 	COALESCE(cat.name, ''), COALESCE(u.full_name, '')`
 
 func (r *CourseRepository) Create(ctx context.Context, course *domain.Course) error {
@@ -320,6 +321,9 @@ func scanCourse(row scannable) (*domain.Course, error) {
 		&c.PublishedAt,
 		&c.CreatedAt,
 		&c.UpdatedAt,
+		&c.EnrollmentCapacity,
+		&c.EnrollmentOpen,
+		&c.WaitlistEnabled,
 		&c.CategoryName,
 		&c.TeacherName,
 	); err != nil {
@@ -330,4 +334,20 @@ func scanCourse(row scannable) (*domain.Course, error) {
 	c.Status = domain.CourseStatus(status)
 	c.Level = domain.CourseLevel(level)
 	return &c, nil
+}
+
+func (r *CourseRepository) UpdateEnrollmentSettings(ctx context.Context, id string, settings domain.CourseEnrollmentSettings) (*domain.Course, error) {
+	const q = `
+		UPDATE courses
+		SET enrollment_capacity = $2, enrollment_open = $3, waitlist_enabled = $4
+		WHERE id = $1 AND deleted_at IS NULL`
+
+	tag, err := r.pool.Exec(ctx, q, id, settings.Capacity, settings.EnrollmentOpen, settings.WaitlistEnabled)
+	if err != nil {
+		return nil, fmt.Errorf("update enrollment settings: %w", err)
+	}
+	if tag.RowsAffected() == 0 {
+		return nil, apperr.NotFound("course not found")
+	}
+	return r.GetByID(ctx, id)
 }

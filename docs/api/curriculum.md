@@ -6,11 +6,12 @@ Course structure: **modules → lessons → content blocks**.
 
 | Viewer | Sees |
 |--------|------|
-| Public / student (published course) | Published lessons only (+ their blocks) |
+| Public / unenrolled | Published lesson outline (no content blocks) |
+| Active enrollee | Published lessons + blocks |
 | Course teacher or platform admin | All modules/lessons/blocks (draft + published) |
 | Draft/archived course (non-owner) | `404` |
 
-Lesson status is independent of course publish: `draft` → `published`.
+Lesson status is independent of course publish: `draft` → `published`. Enrollment access: see [enrollment.md](./enrollment.md).
 
 ## Content block types
 

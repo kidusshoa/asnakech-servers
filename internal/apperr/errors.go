@@ -10,13 +10,13 @@ import (
 type Code string
 
 const (
-	CodeInternal      Code = "internal_error"
-	CodeValidation    Code = "validation_error"
-	CodeUnauthorized  Code = "unauthorized"
-	CodeForbidden     Code = "forbidden"
-	CodeNotFound      Code = "not_found"
-	CodeConflict      Code = "conflict"
-	CodeRateLimited   Code = "rate_limited"
+	CodeInternal     Code = "internal_error"
+	CodeValidation   Code = "validation_error"
+	CodeUnauthorized Code = "unauthorized"
+	CodeForbidden    Code = "forbidden"
+	CodeNotFound     Code = "not_found"
+	CodeConflict     Code = "conflict"
+	CodeRateLimited  Code = "rate_limited"
 )
 
 // Error is the application-level error used across handlers and services.
@@ -77,6 +77,12 @@ func NotFound(message string) *Error {
 
 func Conflict(message string) *Error {
 	return New(CodeConflict, message, http.StatusConflict)
+}
+
+// IsNotFound reports whether err is (or wraps) a not_found app error.
+func IsNotFound(err error) bool {
+	appErr, ok := As(err)
+	return ok && appErr.Code == CodeNotFound
 }
 
 // As extracts an *Error from an error chain.

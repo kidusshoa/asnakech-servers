@@ -58,26 +58,29 @@ type createCategoryRequest struct {
 }
 
 type CourseResponse struct {
-	ID             string     `json:"id"`
-	OrganizationID *string    `json:"organization_id,omitempty"`
-	TeacherID      string     `json:"teacher_id"`
-	TeacherName    string     `json:"teacher_name"`
-	CategoryID     *string    `json:"category_id,omitempty"`
-	CategoryName   string     `json:"category_name,omitempty"`
-	Title          string     `json:"title"`
-	Slug           string     `json:"slug"`
-	Summary        string     `json:"summary"`
-	Description    string     `json:"description"`
-	Status         string     `json:"status"`
-	CoverURL       string     `json:"cover_url"`
-	PriceCents     int        `json:"price_cents"`
-	Currency       string     `json:"currency"`
-	Level          string     `json:"level"`
-	Language       string     `json:"language"`
-	Tags           []string   `json:"tags"`
-	PublishedAt    *time.Time `json:"published_at,omitempty"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
+	ID                 string     `json:"id"`
+	OrganizationID     *string    `json:"organization_id,omitempty"`
+	TeacherID          string     `json:"teacher_id"`
+	TeacherName        string     `json:"teacher_name"`
+	CategoryID         *string    `json:"category_id,omitempty"`
+	CategoryName       string     `json:"category_name,omitempty"`
+	Title              string     `json:"title"`
+	Slug               string     `json:"slug"`
+	Summary            string     `json:"summary"`
+	Description        string     `json:"description"`
+	Status             string     `json:"status"`
+	CoverURL           string     `json:"cover_url"`
+	PriceCents         int        `json:"price_cents"`
+	Currency           string     `json:"currency"`
+	Level              string     `json:"level"`
+	Language           string     `json:"language"`
+	Tags               []string   `json:"tags"`
+	EnrollmentCapacity *int       `json:"enrollment_capacity,omitempty"`
+	EnrollmentOpen     bool       `json:"enrollment_open"`
+	WaitlistEnabled    bool       `json:"waitlist_enabled"`
+	PublishedAt        *time.Time `json:"published_at,omitempty"`
+	CreatedAt          time.Time  `json:"created_at"`
+	UpdatedAt          time.Time  `json:"updated_at"`
 }
 
 type CourseEnvelope struct {
@@ -379,26 +382,29 @@ func toCourseResponse(c *domain.Course) CourseResponse {
 		tags = []string{}
 	}
 	return CourseResponse{
-		ID:             c.ID,
-		OrganizationID: c.OrganizationID,
-		TeacherID:      c.TeacherID,
-		TeacherName:    c.TeacherName,
-		CategoryID:     c.CategoryID,
-		CategoryName:   c.CategoryName,
-		Title:          c.Title,
-		Slug:           c.Slug,
-		Summary:        c.Summary,
-		Description:    c.Description,
-		Status:         string(c.Status),
-		CoverURL:       c.CoverURL,
-		PriceCents:     c.PriceCents,
-		Currency:       c.Currency,
-		Level:          string(c.Level),
-		Language:       c.Language,
-		Tags:           tags,
-		PublishedAt:    c.PublishedAt,
-		CreatedAt:      c.CreatedAt,
-		UpdatedAt:      c.UpdatedAt,
+		ID:                 c.ID,
+		OrganizationID:     c.OrganizationID,
+		TeacherID:          c.TeacherID,
+		TeacherName:        c.TeacherName,
+		CategoryID:         c.CategoryID,
+		CategoryName:       c.CategoryName,
+		Title:              c.Title,
+		Slug:               c.Slug,
+		Summary:            c.Summary,
+		Description:        c.Description,
+		Status:             string(c.Status),
+		CoverURL:           c.CoverURL,
+		PriceCents:         c.PriceCents,
+		Currency:           c.Currency,
+		Level:              string(c.Level),
+		Language:           c.Language,
+		Tags:               tags,
+		EnrollmentCapacity: c.EnrollmentCapacity,
+		EnrollmentOpen:     c.EnrollmentOpen,
+		WaitlistEnabled:    c.WaitlistEnabled,
+		PublishedAt:        c.PublishedAt,
+		CreatedAt:          c.CreatedAt,
+		UpdatedAt:          c.UpdatedAt,
 	}
 }
 

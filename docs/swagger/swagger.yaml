@@ -99,6 +99,27 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.CourseAccessEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CourseAccessResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CourseAccessResponse:
+    properties:
+      can_access_content:
+        type: boolean
+      course_id:
+        type: string
+      enrollment:
+        $ref: '#/definitions/handlers.EnrollmentResponse'
+      is_platform_admin:
+        type: boolean
+      is_teacher:
+        type: boolean
+    type: object
   handlers.CourseEnvelope:
     properties:
       data:
@@ -133,6 +154,10 @@ definitions:
         type: string
       description:
         type: string
+      enrollment_capacity:
+        type: integer
+      enrollment_open:
+        type: boolean
       id:
         type: string
       language:
@@ -163,6 +188,8 @@ definitions:
         type: string
       updated_at:
         type: string
+      waitlist_enabled:
+        type: boolean
     type: object
   handlers.CurriculumTreeEnvelope:
     properties:
@@ -180,6 +207,59 @@ definitions:
         items:
           $ref: '#/definitions/handlers.ModuleResponse'
         type: array
+    type: object
+  handlers.EnrollmentEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.EnrollmentResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.EnrollmentListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.EnrollmentResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.EnrollmentResponse:
+    properties:
+      cancelled_at:
+        type: string
+      course_id:
+        type: string
+      course_slug:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      enrolled_at:
+        type: string
+      id:
+        type: string
+      invite_code_id:
+        type: string
+      source:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      user_email:
+        type: string
+      user_full_name:
+        type: string
+      user_id:
+        type: string
+      waitlisted_at:
+        type: string
     type: object
   handlers.ErrorResponse:
     properties:
@@ -207,6 +287,47 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.InviteCodeEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.InviteCodeResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.InviteCodeListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.InviteCodeResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.InviteCodeResponse:
+    properties:
+      code:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      expires_at:
+        type: string
+      id:
+        type: string
+      max_uses:
+        type: integer
+      revoked_at:
+        type: string
+      updated_at:
+        type: string
+      uses_count:
+        type: integer
     type: object
   handlers.InviteEnvelope:
     properties:
@@ -580,6 +701,15 @@ definitions:
     required:
     - title
     type: object
+  handlers.createInviteCodeRequest:
+    properties:
+      code:
+        type: string
+      expires_at:
+        type: string
+      max_uses:
+        type: integer
+    type: object
   handlers.createInviteRequest:
     properties:
       email:
@@ -624,6 +754,20 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  handlers.enrollRequest:
+    properties:
+      invite_code:
+        type: string
+    type: object
+  handlers.enrollmentSettingsRequest:
+    properties:
+      enrollment_capacity:
+        type: integer
+      enrollment_open:
+        type: boolean
+      waitlist_enabled:
+        type: boolean
     type: object
   handlers.forgotPasswordRequest:
     properties:
@@ -1474,6 +1618,26 @@ paths:
       summary: Update course
       tags:
       - courses
+  /api/v1/courses/{id}/access:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseAccessEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Check course content access
+      tags:
+      - enrollments
   /api/v1/courses/{id}/archive:
     post:
       parameters:
@@ -1512,6 +1676,183 @@ paths:
       summary: Get course curriculum tree
       tags:
       - curriculum
+  /api/v1/courses/{id}/enroll:
+    delete:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.EnrollmentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Unenroll from a course
+      tags:
+      - enrollments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Optional invite code
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/handlers.enrollRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.EnrollmentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Enroll in a course
+      tags:
+      - enrollments
+  /api/v1/courses/{id}/enrollment-settings:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Settings
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.enrollmentSettingsRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update course enrollment settings
+      tags:
+      - enrollments
+  /api/v1/courses/{id}/enrollments:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      - description: active|waitlisted|cancelled
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.EnrollmentListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List enrollments for a course
+      tags:
+      - enrollments
+  /api/v1/courses/{id}/invite-codes:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.InviteCodeListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List enrollment invite codes
+      tags:
+      - enrollments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invite
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/handlers.createInviteCodeRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.InviteCodeEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create enrollment invite code
+      tags:
+      - enrollments
+  /api/v1/courses/{id}/invite-codes/{codeId}:
+    delete:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Invite code ID
+        in: path
+        name: codeId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Revoke enrollment invite code
+      tags:
+      - enrollments
   /api/v1/courses/{id}/modules:
     post:
       consumes:
@@ -1759,6 +2100,33 @@ paths:
       summary: Unpublish lesson (back to draft)
       tags:
       - curriculum
+  /api/v1/me/enrollments:
+    get:
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      - description: active|waitlisted|cancelled
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.EnrollmentListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List my enrollments
+      tags:
+      - enrollments
   /api/v1/modules/{moduleId}:
     delete:
       parameters:

@@ -14,3 +14,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Organizations: create/list, members, invites/accept
 - Course catalog: categories, CRUD, tags, publish/archive, list filters
 - Curriculum: modules → lessons → content blocks, reorder, lesson publish
+- Enrollments: self enroll/unenroll, capacity/waitlist, invite codes, content access gate

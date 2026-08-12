@@ -28,4 +28,5 @@ type CourseRepository interface {
 	SetStatus(ctx context.Context, id string, status domain.CourseStatus, publishedAt *time.Time) (*domain.Course, error)
 	SoftDelete(ctx context.Context, id string, at time.Time) error
 	List(ctx context.Context, filter domain.CourseListFilter) ([]domain.Course, int64, error)
+	UpdateEnrollmentSettings(ctx context.Context, id string, settings domain.CourseEnrollmentSettings) (*domain.Course, error)
 }

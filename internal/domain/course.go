@@ -58,6 +58,10 @@ type Course struct {
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
 
+	EnrollmentCapacity *int
+	EnrollmentOpen     bool
+	WaitlistEnabled    bool
+
 	// Optional joined fields
 	CategoryName string
 	TeacherName  string
