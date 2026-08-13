@@ -26,12 +26,14 @@ type Config struct {
 	JWTAccessTTL  time.Duration
 	JWTRefreshTTL time.Duration
 
-	S3Endpoint     string
-	S3Region       string
-	S3Bucket       string
-	S3AccessKey    string
-	S3SecretKey    string
-	S3UsePathStyle bool
+	S3Endpoint      string
+	S3Region        string
+	S3Bucket        string
+	S3AccessKey     string
+	S3SecretKey     string
+	S3UsePathStyle  bool
+	S3PublicBaseURL string
+	MediaPresignTTL time.Duration
 }
 
 // Load reads optional .env, then environment variables into Config.
@@ -54,12 +56,14 @@ func Load() (*Config, error) {
 		JWTAccessTTL:  getEnvAsDuration("JWT_ACCESS_TTL", 15*time.Minute),
 		JWTRefreshTTL: getEnvAsDuration("JWT_REFRESH_TTL", 168*time.Hour),
 
-		S3Endpoint:     getEnv("S3_ENDPOINT", ""),
-		S3Region:       getEnv("S3_REGION", "us-east-1"),
-		S3Bucket:       getEnv("S3_BUCKET", "asnakech"),
-		S3AccessKey:    getEnv("S3_ACCESS_KEY", ""),
-		S3SecretKey:    getEnv("S3_SECRET_KEY", ""),
-		S3UsePathStyle: getEnvAsBool("S3_USE_PATH_STYLE", true),
+		S3Endpoint:      getEnv("S3_ENDPOINT", ""),
+		S3Region:        getEnv("S3_REGION", "us-east-1"),
+		S3Bucket:        getEnv("S3_BUCKET", "asnakech"),
+		S3AccessKey:     getEnv("S3_ACCESS_KEY", ""),
+		S3SecretKey:     getEnv("S3_SECRET_KEY", ""),
+		S3UsePathStyle:  getEnvAsBool("S3_USE_PATH_STYLE", true),
+		S3PublicBaseURL: getEnv("S3_PUBLIC_BASE_URL", ""),
+		MediaPresignTTL: getEnvAsDuration("MEDIA_PRESIGN_TTL", 15*time.Minute),
 	}
 
 	if err := cfg.validate(); err != nil {

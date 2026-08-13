@@ -17,6 +17,7 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/rbac"
 	"github.com/asnakech/asnakech-servers/internal/repository/postgres"
 	"github.com/asnakech/asnakech-servers/internal/service"
+	"github.com/asnakech/asnakech-servers/internal/storage"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -119,8 +120,21 @@ func (s *Server) registerRoutes() {
 				s.cfg.IsDevelopment(),
 			)
 			authHandler := handlers.NewAuthHandler(authService)
+
+			objectStore, err := storage.NewS3Store(s.cfg)
+			if err != nil {
+				s.log.Error().Err(err).Msg("s3 client init failed — media uploads disabled")
+				objectStore = storage.NoopStore{}
+			}
+			mediaRepo := postgres.NewMediaRepository(s.deps.DB)
+			courseRepoEarly := postgres.NewCourseRepository(s.deps.DB)
+			mediaService := service.NewMediaService(
+				mediaRepo, courseRepoEarly, objectStore, storage.SkipScanner{}, s.cfg.MediaPresignTTL,
+			)
+			mediaHandler := handlers.NewMediaHandler(mediaService)
+
 			userService := service.NewUserService(userRepo, roleRepo)
-			userHandler := handlers.NewUserHandler(userService)
+			userHandler := handlers.NewUserHandler(userService, mediaService)
 
 			authLimiter := middleware.NewIPRateLimiter(2, 10)
 			authGroup := v1.Group("/auth")
@@ -143,6 +157,17 @@ func (s *Server) registerRoutes() {
 				usersGroup.PATCH("/me", middleware.RequirePermission(rbac.PermProfileWrite), userHandler.UpdateMyProfile)
 				usersGroup.PUT("/me/avatar", middleware.RequirePermission(rbac.PermProfileWrite), userHandler.SetMyAvatar)
 				usersGroup.GET("/me/avatar/upload-intent", middleware.RequirePermission(rbac.PermProfileWrite), userHandler.AvatarUploadIntent)
+			}
+
+			v1.GET("/me/media", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermProfileRead), mediaHandler.ListMyMedia)
+			mediaGroup := v1.Group("/media")
+			mediaGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				mediaGroup.POST("/uploads", middleware.RequirePermission(rbac.PermProfileWrite), mediaHandler.CreateUpload)
+				mediaGroup.POST("/:id/complete", middleware.RequirePermission(rbac.PermProfileWrite), mediaHandler.CompleteUpload)
+				mediaGroup.GET("/:id", middleware.RequirePermission(rbac.PermProfileRead), mediaHandler.GetMedia)
+				mediaGroup.DELETE("/:id", middleware.RequirePermission(rbac.PermProfileWrite), mediaHandler.DeleteMedia)
+				mediaGroup.POST("/:id/scan-result", middleware.RequirePermission(rbac.PermUsersManage), mediaHandler.ApplyScanResult)
 			}
 
 			adminGroup := v1.Group("/admin")

@@ -13,10 +13,11 @@ import (
 
 type UserHandler struct {
 	users *service.UserService
+	media *service.MediaService
 }
 
-func NewUserHandler(users *service.UserService) *UserHandler {
-	return &UserHandler{users: users}
+func NewUserHandler(users *service.UserService, media *service.MediaService) *UserHandler {
+	return &UserHandler{users: users, media: media}
 }
 
 type updateProfileRequest struct {
@@ -38,8 +39,8 @@ type adminUpdateUserRequest struct {
 }
 
 type UserListResponse struct {
-	Success bool         `json:"success" example:"true"`
-	Data    []UserPublic `json:"data"`
+	Success bool          `json:"success" example:"true"`
+	Data    []UserPublic  `json:"data"`
 	Meta    response.Meta `json:"meta"`
 }
 
@@ -135,7 +136,7 @@ func (h *UserHandler) SetMyAvatar(c *gin.Context) {
 
 // AvatarUploadIntent godoc
 // @Summary      Avatar upload intent
-// @Description  Placeholder for future presigned upload flow
+// @Description  Presigned PUT for avatar (Stage 14 media). Falls back to note if storage unset.
 // @Tags         users
 // @Produce      json
 // @Security     BearerAuth
@@ -143,6 +144,20 @@ func (h *UserHandler) SetMyAvatar(c *gin.Context) {
 // @Failure      401 {object} ErrorResponse
 // @Router       /api/v1/users/me/avatar/upload-intent [get]
 func (h *UserHandler) AvatarUploadIntent(c *gin.Context) {
+	if h.media != nil {
+		intent, err := h.media.AvatarUploadIntent(c.Request.Context(), c.GetString(middleware.ContextUserID))
+		if err != nil {
+			response.Fail(c, err)
+			return
+		}
+		response.OK(c, AvatarUploadIntent{
+			Method:    intent.Method,
+			UploadURL: intent.UploadURL,
+			PublicURL: intent.Asset.PublicURL,
+			Note:      "PUT bytes to upload_url with Content-Type header, then POST /media/{id}/complete and PUT /users/me/avatar with public_url",
+		})
+		return
+	}
 	intent := h.users.AvatarUploadIntent(c.GetString(middleware.ContextUserID))
 	response.OK(c, AvatarUploadIntent{
 		Method:    intent.Method,

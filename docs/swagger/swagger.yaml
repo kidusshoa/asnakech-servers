@@ -707,6 +707,87 @@ definitions:
         example: true
         type: boolean
     type: object
+  handlers.MediaAssetEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.MediaAssetResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.MediaAssetResponse:
+    properties:
+      content_type:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      duration_seconds:
+        type: integer
+      height:
+        type: integer
+      id:
+        type: string
+      original_filename:
+        type: string
+      owner_id:
+        type: string
+      public_url:
+        type: string
+      purpose:
+        type: string
+      scan_note:
+        type: string
+      scan_status:
+        type: string
+      size_bytes:
+        type: integer
+      status:
+        type: string
+      storage_key:
+        type: string
+      updated_at:
+        type: string
+      width:
+        type: integer
+    type: object
+  handlers.MediaListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.MediaAssetResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.MediaUploadIntentEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.MediaUploadIntentResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.MediaUploadIntentResponse:
+    properties:
+      asset:
+        $ref: '#/definitions/handlers.MediaAssetResponse'
+      expires_at:
+        type: string
+      headers:
+        additionalProperties:
+          type: string
+        type: object
+      method:
+        example: PUT
+        type: string
+      upload_url:
+        type: string
+    type: object
   handlers.MemberListEnvelope:
     properties:
       data:
@@ -1126,6 +1207,17 @@ definitions:
         example: teacher
         type: string
     type: object
+  handlers.completeMediaRequest:
+    properties:
+      duration_seconds:
+        type: integer
+      height:
+        type: integer
+      size_bytes:
+        type: integer
+      width:
+        type: integer
+    type: object
   handlers.createAssignmentRequest:
     properties:
       allow_late:
@@ -1239,6 +1331,25 @@ definitions:
         type: string
     required:
     - title
+    type: object
+  handlers.createMediaUploadRequest:
+    properties:
+      content_type:
+        example: video/mp4
+        type: string
+      course_id:
+        type: string
+      original_filename:
+        example: intro.mp4
+        type: string
+      purpose:
+        example: lesson_media
+        type: string
+      size_bytes:
+        example: 1048576
+        type: integer
+    required:
+    - content_type
     type: object
   handlers.createModuleRequest:
     properties:
@@ -1410,6 +1521,16 @@ definitions:
         type: array
     required:
     - answers
+    type: object
+  handlers.scanResultRequest:
+    properties:
+      note:
+        type: string
+      scan_status:
+        example: clean
+        type: string
+    required:
+    - scan_status
     type: object
   handlers.setAvatarRequest:
     properties:
@@ -3148,6 +3269,29 @@ paths:
       summary: List my enrollments
       tags:
       - enrollments
+  /api/v1/me/media:
+    get:
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MediaListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List my media assets
+      tags:
+      - media
   /api/v1/me/progress:
     get:
       produces:
@@ -3162,6 +3306,123 @@ paths:
       summary: Student progress dashboard
       tags:
       - progress
+  /api/v1/media/{id}:
+    delete:
+      parameters:
+      - description: Media asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessageResponse'
+      security:
+      - BearerAuth: []
+      summary: Soft-delete media asset
+      tags:
+      - media
+    get:
+      parameters:
+      - description: Media asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MediaAssetEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get media asset
+      tags:
+      - media
+  /api/v1/media/{id}/complete:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Media asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Metadata
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/handlers.completeMediaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MediaAssetEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Confirm media upload + optional video metadata
+      tags:
+      - media
+  /api/v1/media/{id}/scan-result:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Media asset ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Scan result
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.scanResultRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MediaAssetEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Apply virus-scan result (admin hook)
+      tags:
+      - media
+  /api/v1/media/uploads:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Upload
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createMediaUploadRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.MediaUploadIntentEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create presigned media upload
+      tags:
+      - media
   /api/v1/modules/{moduleId}:
     delete:
       parameters:
@@ -3921,7 +4182,8 @@ paths:
       - users
   /api/v1/users/me/avatar/upload-intent:
     get:
-      description: Placeholder for future presigned upload flow
+      description: Presigned PUT for avatar (Stage 14 media). Falls back to note if
+        storage unset.
       produces:
       - application/json
       responses:

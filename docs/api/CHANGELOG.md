@@ -17,3 +17,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Enrollments: self enroll/unenroll, capacity/waitlist, invite codes, content access gate
 - Progress: lesson upsert (idempotent), course %, completion, student dashboard
 - Assessments: MCQ/short-answer quizzes, assignments + rubric, auto/manual grade, gradebook
+- Media: presigned S3/MinIO uploads, purpose limits, video metadata, virus-scan hook, CDN URLs

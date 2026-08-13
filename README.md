@@ -140,8 +140,9 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `GET` | `/api/v1/me/progress` | Progress dashboard |
 | `POST/GET` | `/api/v1/courses/:id/quizzes` | Quizzes |
 | `GET` | `/api/v1/courses/:id/gradebook` | Teacher gradebook |
+| `POST` | `/api/v1/media/uploads` | Presigned upload intent |
 
-Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md), [curriculum](docs/api/curriculum.md), [enrollment](docs/api/enrollment.md), [progress](docs/api/progress.md), [assessments](docs/api/assessments.md)).
+Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md), [curriculum](docs/api/curriculum.md), [enrollment](docs/api/enrollment.md), [progress](docs/api/progress.md), [assessments](docs/api/assessments.md), [media](docs/api/media.md)).
 
 Responses use a shared envelope:
 
@@ -176,6 +177,8 @@ Every response includes an `X-Request-ID` header (generated if the client did no
 | `S3_BUCKET` | `asnakech` | Default bucket |
 | `S3_ACCESS_KEY` / `S3_SECRET_KEY` | | Object storage credentials |
 | `S3_USE_PATH_STYLE` | `true` | Path-style URLs (MinIO) |
+| `S3_PUBLIC_BASE_URL` | _(empty)_ | Optional CDN base for `public_url` |
+| `MEDIA_PRESIGN_TTL` | `15m` | Presigned upload URL lifetime |
 
 Copy `.env.example` → `.env` for local defaults matching Compose.
 

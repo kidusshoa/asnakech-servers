@@ -28,6 +28,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Enrollments: active/waitlisted/cancelled, invite codes, capacity, waitlist promotion, enrollment events
 - Progress: lesson progress + course aggregates, prerequisites, idempotent upserts, `/me/progress` dashboard
 - Assessments: quizzes (MCQ/short answer, attempts, auto-grade), assignments (submissions, rubric), gradebook
+- Media: `media_assets`, presigned PUT uploads, attachment limits, scan hook, avatar upload intent
 
 ### Changed
 

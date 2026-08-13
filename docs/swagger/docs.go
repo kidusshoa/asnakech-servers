@@ -2440,6 +2440,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/me/media": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "List my media assets",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MediaListEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/me/progress": {
             "get": {
                 "security": [
@@ -2459,6 +2497,197 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.DashboardProgressEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/media/uploads": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Create presigned media upload",
+                "parameters": [
+                    {
+                        "description": "Upload",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.createMediaUploadRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MediaUploadIntentEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/media/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Get media asset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Media asset ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MediaAssetEnvelope"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Soft-delete media asset",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Media asset ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MessageResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/media/{id}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Confirm media upload + optional video metadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Media asset ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Metadata",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.completeMediaRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MediaAssetEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/media/{id}/scan-result": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "media"
+                ],
+                "summary": "Apply virus-scan result (admin hook)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Media asset ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Scan result",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.scanResultRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.MediaAssetEnvelope"
                         }
                     }
                 }
@@ -3684,7 +3913,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Placeholder for future presigned upload flow",
+                "description": "Presigned PUT for avatar (Stage 14 media). Falls back to note if storage unset.",
                 "produces": [
                     "application/json"
                 ],
@@ -4826,6 +5055,128 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.MediaAssetEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.MediaAssetResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.MediaAssetResponse": {
+            "type": "object",
+            "properties": {
+                "content_type": {
+                    "type": "string"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "duration_seconds": {
+                    "type": "integer"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "original_filename": {
+                    "type": "string"
+                },
+                "owner_id": {
+                    "type": "string"
+                },
+                "public_url": {
+                    "type": "string"
+                },
+                "purpose": {
+                    "type": "string"
+                },
+                "scan_note": {
+                    "type": "string"
+                },
+                "scan_status": {
+                    "type": "string"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "storage_key": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.MediaListEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.MediaAssetResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.MediaUploadIntentEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.MediaUploadIntentResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.MediaUploadIntentResponse": {
+            "type": "object",
+            "properties": {
+                "asset": {
+                    "$ref": "#/definitions/handlers.MediaAssetResponse"
+                },
+                "expires_at": {
+                    "type": "string"
+                },
+                "headers": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "method": {
+                    "type": "string",
+                    "example": "PUT"
+                },
+                "upload_url": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.MemberListEnvelope": {
             "type": "object",
             "properties": {
@@ -5458,6 +5809,23 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.completeMediaRequest": {
+            "type": "object",
+            "properties": {
+                "duration_seconds": {
+                    "type": "integer"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "size_bytes": {
+                    "type": "integer"
+                },
+                "width": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.createAssignmentRequest": {
             "type": "object",
             "required": [
@@ -5627,6 +5995,33 @@ const docTemplate = `{
                 },
                 "title": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.createMediaUploadRequest": {
+            "type": "object",
+            "required": [
+                "content_type"
+            ],
+            "properties": {
+                "content_type": {
+                    "type": "string",
+                    "example": "video/mp4"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "original_filename": {
+                    "type": "string",
+                    "example": "intro.mp4"
+                },
+                "purpose": {
+                    "type": "string",
+                    "example": "lesson_media"
+                },
+                "size_bytes": {
+                    "type": "integer",
+                    "example": 1048576
                 }
             }
         },
@@ -5886,6 +6281,21 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/handlers.saveAnswerItem"
                     }
+                }
+            }
+        },
+        "handlers.scanResultRequest": {
+            "type": "object",
+            "required": [
+                "scan_status"
+            ],
+            "properties": {
+                "note": {
+                    "type": "string"
+                },
+                "scan_status": {
+                    "type": "string",
+                    "example": "clean"
                 }
             }
         },
