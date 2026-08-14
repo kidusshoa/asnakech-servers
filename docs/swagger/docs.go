@@ -2043,6 +2043,82 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/courses/{id}/sessions": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "List course live sessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionListEnvelope"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Create live class session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Session",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.createLiveSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{id}/tags": {
             "put": {
                 "security": [
@@ -2391,6 +2467,58 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.LessonEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/me/calendar": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Calendar feed for teacher/student sessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "RFC3339 start",
+                        "name": "from",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "RFC3339 end",
+                        "name": "to",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Per page",
+                        "name": "per_page",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionListEnvelope"
                         }
                     }
                 }
@@ -3730,6 +3858,365 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/sessions/{sessionId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Get live session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Update live session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Patch",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.updateLiveSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/attendance": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "List session attendance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AttendanceListEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/attendance/check-in": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Self check-in to live session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AttendanceEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/attendance/{userId}": {
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Mark user attendance",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Status",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handlers.markAttendanceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.AttendanceEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/cancel": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Cancel live session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/complete": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Mark live session completed",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/generate-link": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Generate join link via provider adapter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/join": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Get join link for a session",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.JoinInfoEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/sessions/{sessionId}/publish": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "live"
+                ],
+                "summary": "Publish live session to students",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.LiveSessionEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/submissions/{submissionId}/grade": {
             "post": {
                 "security": [
@@ -4158,6 +4645,77 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "submitted_at": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_email": {
+                    "type": "string"
+                },
+                "user_full_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.AttendanceEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.AttendanceResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.AttendanceListEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.AttendanceResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.AttendanceResponse": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "joined_at": {
+                    "type": "string"
+                },
+                "left_at": {
+                    "type": "string"
+                },
+                "marked_by": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 },
                 "updated_at": {
@@ -4934,6 +5492,44 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.JoinInfoEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.JoinInfoResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.JoinInfoResponse": {
+            "type": "object",
+            "properties": {
+                "ends_at": {
+                    "type": "string"
+                },
+                "host_url": {
+                    "type": "string"
+                },
+                "is_host": {
+                    "type": "boolean"
+                },
+                "join_url": {
+                    "type": "string"
+                },
+                "session_id": {
+                    "type": "string"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.LessonEnvelope": {
             "type": "object",
             "properties": {
@@ -5033,6 +5629,101 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.LiveSessionEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.LiveSessionResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.LiveSessionListEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.LiveSessionResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.LiveSessionResponse": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "course_slug": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string"
+                },
+                "external_id": {
+                    "type": "string"
+                },
+                "host_url": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "join_url": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "provider_metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                },
+                "timezone": {
                     "type": "string"
                 },
                 "title": {
@@ -5998,6 +6689,43 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.createLiveSessionRequest": {
+            "type": "object",
+            "required": [
+                "ends_at",
+                "starts_at",
+                "title"
+            ],
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string"
+                },
+                "host_url": {
+                    "type": "string"
+                },
+                "join_url": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "timezone": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.createMediaUploadRequest": {
             "type": "object",
             "required": [
@@ -6155,6 +6883,20 @@ const docTemplate = `{
             ],
             "properties": {
                 "refresh_token": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.markAttendanceRequest": {
+            "type": "object",
+            "required": [
+                "status"
+            ],
+            "properties": {
+                "note": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "string"
                 }
             }
@@ -6420,6 +7162,38 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "summary": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.updateLiveSessionRequest": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "ends_at": {
+                    "type": "string"
+                },
+                "host_url": {
+                    "type": "string"
+                },
+                "join_url": {
+                    "type": "string"
+                },
+                "lesson_id": {
+                    "type": "string"
+                },
+                "provider": {
+                    "type": "string"
+                },
+                "starts_at": {
+                    "type": "string"
+                },
+                "timezone": {
                     "type": "string"
                 },
                 "title": {

@@ -12,6 +12,7 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/auth"
 	"github.com/asnakech/asnakech-servers/internal/config"
 	"github.com/asnakech/asnakech-servers/internal/handlers"
+	"github.com/asnakech/asnakech-servers/internal/live"
 	"github.com/asnakech/asnakech-servers/internal/middleware"
 	"github.com/asnakech/asnakech-servers/internal/platform/ready"
 	"github.com/asnakech/asnakech-servers/internal/rbac"
@@ -242,6 +243,12 @@ func (s *Server) registerRoutes() {
 			)
 			assessmentHandler := handlers.NewAssessmentHandler(assessmentService)
 
+			liveSessionRepo := postgres.NewLiveSessionRepository(s.deps.DB)
+			attendanceRepo := postgres.NewSessionAttendanceRepository(s.deps.DB)
+			liveProviders := live.NewRegistry(s.cfg)
+			liveService := service.NewLiveService(courseRepo, enrollmentRepo, liveSessionRepo, attendanceRepo, liveProviders)
+			liveHandler := handlers.NewLiveHandler(liveService)
+
 			v1.GET("/categories", courseHandler.ListCategories)
 			v1.POST("/categories",
 				middleware.BearerAuth(tokenManager),
@@ -258,6 +265,11 @@ func (s *Server) registerRoutes() {
 				middleware.BearerAuth(tokenManager),
 				middleware.RequirePermission(rbac.PermCoursesRead),
 				progressHandler.ListMyProgress,
+			)
+			v1.GET("/me/calendar",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesRead),
+				liveHandler.ListCalendar,
 			)
 
 			coursesGroup := v1.Group("/courses")
@@ -291,6 +303,24 @@ func (s *Server) registerRoutes() {
 				coursesGroup.POST("/:id/assignments", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.CreateAssignment)
 				coursesGroup.GET("/:id/assignments", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), assessmentHandler.ListAssignments)
 				coursesGroup.GET("/:id/gradebook", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), assessmentHandler.Gradebook)
+
+				coursesGroup.POST("/:id/sessions", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.CreateSession)
+				coursesGroup.GET("/:id/sessions", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), liveHandler.ListCourseSessions)
+			}
+
+			sessionsGroup := v1.Group("/sessions")
+			sessionsGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				sessionsGroup.GET("/:sessionId", middleware.RequirePermission(rbac.PermCoursesRead), liveHandler.GetSession)
+				sessionsGroup.PATCH("/:sessionId", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.UpdateSession)
+				sessionsGroup.POST("/:sessionId/publish", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.PublishSession)
+				sessionsGroup.POST("/:sessionId/complete", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.CompleteSession)
+				sessionsGroup.POST("/:sessionId/cancel", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.CancelSession)
+				sessionsGroup.POST("/:sessionId/generate-link", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.GenerateLink)
+				sessionsGroup.GET("/:sessionId/join", middleware.RequirePermission(rbac.PermCoursesRead), liveHandler.JoinSession)
+				sessionsGroup.GET("/:sessionId/attendance", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.ListAttendance)
+				sessionsGroup.PUT("/:sessionId/attendance/:userId", middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.MarkAttendance)
+				sessionsGroup.POST("/:sessionId/attendance/check-in", middleware.RequirePermission(rbac.PermCoursesRead), liveHandler.CheckIn)
 			}
 
 			quizzesGroup := v1.Group("/quizzes")

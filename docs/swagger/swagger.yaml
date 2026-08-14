@@ -125,6 +125,53 @@ definitions:
       user_id:
         type: string
     type: object
+  handlers.AttendanceEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.AttendanceResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AttendanceListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.AttendanceResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AttendanceResponse:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      joined_at:
+        type: string
+      left_at:
+        type: string
+      marked_by:
+        type: string
+      note:
+        type: string
+      session_id:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+      user_email:
+        type: string
+      user_full_name:
+        type: string
+      user_id:
+        type: string
+    type: object
   handlers.AuthSuccessData:
     properties:
       tokens:
@@ -627,6 +674,31 @@ definitions:
       token:
         type: string
     type: object
+  handlers.JoinInfoEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.JoinInfoResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.JoinInfoResponse:
+    properties:
+      ends_at:
+        type: string
+      host_url:
+        type: string
+      is_host:
+        type: boolean
+      join_url:
+        type: string
+      session_id:
+        type: string
+      starts_at:
+        type: string
+      status:
+        type: string
+    type: object
   handlers.LessonEnvelope:
     properties:
       data:
@@ -693,6 +765,69 @@ definitions:
       status:
         type: string
       summary:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.LiveSessionEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.LiveSessionResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.LiveSessionListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.LiveSessionResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.LiveSessionResponse:
+    properties:
+      course_id:
+        type: string
+      course_slug:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      description:
+        type: string
+      ends_at:
+        type: string
+      external_id:
+        type: string
+      host_url:
+        type: string
+      id:
+        type: string
+      join_url:
+        type: string
+      lesson_id:
+        type: string
+      provider:
+        type: string
+      provider_metadata:
+        additionalProperties:
+          type: string
+        type: object
+      starts_at:
+        type: string
+      status:
+        type: string
+      timezone:
         type: string
       title:
         type: string
@@ -1332,6 +1467,31 @@ definitions:
     required:
     - title
     type: object
+  handlers.createLiveSessionRequest:
+    properties:
+      description:
+        type: string
+      ends_at:
+        type: string
+      host_url:
+        type: string
+      join_url:
+        type: string
+      lesson_id:
+        type: string
+      provider:
+        type: string
+      starts_at:
+        type: string
+      timezone:
+        type: string
+      title:
+        type: string
+    required:
+    - ends_at
+    - starts_at
+    - title
+    type: object
   handlers.createMediaUploadRequest:
     properties:
       content_type:
@@ -1438,6 +1598,15 @@ definitions:
         type: string
     required:
     - refresh_token
+    type: object
+  handlers.markAttendanceRequest:
+    properties:
+      note:
+        type: string
+      status:
+        type: string
+    required:
+    - status
     type: object
   handlers.quizOptionRequest:
     properties:
@@ -1615,6 +1784,27 @@ definitions:
         type: string
     required:
     - title
+    type: object
+  handlers.updateLiveSessionRequest:
+    properties:
+      description:
+        type: string
+      ends_at:
+        type: string
+      host_url:
+        type: string
+      join_url:
+        type: string
+      lesson_id:
+        type: string
+      provider:
+        type: string
+      starts_at:
+        type: string
+      timezone:
+        type: string
+      title:
+        type: string
     type: object
   handlers.updateMemberRoleRequest:
     properties:
@@ -3024,6 +3214,53 @@ paths:
       summary: Create quiz
       tags:
       - assessments
+  /api/v1/courses/{id}/sessions:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List course live sessions
+      tags:
+      - live
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Session
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createLiveSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create live class session
+      tags:
+      - live
   /api/v1/courses/{id}/tags:
     put:
       consumes:
@@ -3242,6 +3479,39 @@ paths:
       summary: Unpublish lesson (back to draft)
       tags:
       - curriculum
+  /api/v1/me/calendar:
+    get:
+      parameters:
+      - description: RFC3339 start
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: RFC3339 end
+        in: query
+        name: to
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Calendar feed for teacher/student sessions
+      tags:
+      - live
   /api/v1/me/enrollments:
     get:
       parameters:
@@ -4070,6 +4340,226 @@ paths:
       summary: List platform roles
       tags:
       - roles
+  /api/v1/sessions/{sessionId}:
+    get:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get live session
+      tags:
+      - live
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Patch
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.updateLiveSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update live session
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/attendance:
+    get:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttendanceListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List session attendance
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/attendance/{userId}:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      - description: Status
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.markAttendanceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttendanceEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Mark user attendance
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/attendance/check-in:
+    post:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AttendanceEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Self check-in to live session
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/cancel:
+    post:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Cancel live session
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/complete:
+    post:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Mark live session completed
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/generate-link:
+    post:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Generate join link via provider adapter
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/join:
+    get:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.JoinInfoEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get join link for a session
+      tags:
+      - live
+  /api/v1/sessions/{sessionId}/publish:
+    post:
+      parameters:
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LiveSessionEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Publish live session to students
+      tags:
+      - live
   /api/v1/submissions/{submissionId}/grade:
     post:
       consumes:

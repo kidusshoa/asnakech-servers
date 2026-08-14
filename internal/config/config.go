@@ -34,6 +34,9 @@ type Config struct {
 	S3UsePathStyle  bool
 	S3PublicBaseURL string
 	MediaPresignTTL time.Duration
+
+	LiveDefaultProvider string
+	LiveJitsiBaseURL    string
 }
 
 // Load reads optional .env, then environment variables into Config.
@@ -64,6 +67,9 @@ func Load() (*Config, error) {
 		S3UsePathStyle:  getEnvAsBool("S3_USE_PATH_STYLE", true),
 		S3PublicBaseURL: getEnv("S3_PUBLIC_BASE_URL", ""),
 		MediaPresignTTL: getEnvAsDuration("MEDIA_PRESIGN_TTL", 15*time.Minute),
+
+		LiveDefaultProvider: getEnv("LIVE_DEFAULT_PROVIDER", "custom"),
+		LiveJitsiBaseURL:    getEnv("LIVE_JITSI_BASE_URL", "https://meet.jit.si"),
 	}
 
 	if err := cfg.validate(); err != nil {
