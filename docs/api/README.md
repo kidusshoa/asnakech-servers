@@ -25,6 +25,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 | [assessments.md](./assessments.md) | Quizzes, assignments, gradebook |
 | [media.md](./media.md) | Presigned uploads, limits, scan hook |
 | [live.md](./live.md) | Live sessions, attendance, calendar |
+| [communication.md](./communication.md) | Announcements, discussions, DMs, notifications |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

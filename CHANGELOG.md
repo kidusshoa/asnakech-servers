@@ -30,6 +30,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Assessments: quizzes (MCQ/short answer, attempts, auto-grade), assignments (submissions, rubric), gradebook
 - Media: `media_assets`, presigned PUT uploads, attachment limits, scan hook, avatar upload intent
 - Live: `live_sessions`, `session_attendance`, Jitsi/custom/Zoom/Meet adapters, calendar feed
+- Communication: announcements, threads/posts, DMs, `notification_outbox` (in-app + email queue)
 
 ### Changed
 

@@ -14,6 +14,7 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/handlers"
 	"github.com/asnakech/asnakech-servers/internal/live"
 	"github.com/asnakech/asnakech-servers/internal/middleware"
+	"github.com/asnakech/asnakech-servers/internal/notify"
 	"github.com/asnakech/asnakech-servers/internal/platform/ready"
 	"github.com/asnakech/asnakech-servers/internal/rbac"
 	"github.com/asnakech/asnakech-servers/internal/repository/postgres"
@@ -249,6 +250,19 @@ func (s *Server) registerRoutes() {
 			liveService := service.NewLiveService(courseRepo, enrollmentRepo, liveSessionRepo, attendanceRepo, liveProviders)
 			liveHandler := handlers.NewLiveHandler(liveService)
 
+			announcementRepo := postgres.NewAnnouncementRepository(s.deps.DB)
+			threadRepo := postgres.NewDiscussionThreadRepository(s.deps.DB)
+			postRepo := postgres.NewDiscussionPostRepository(s.deps.DB)
+			dmConvRepo := postgres.NewDMConversationRepository(s.deps.DB)
+			dmMsgRepo := postgres.NewDMMessageRepository(s.deps.DB)
+			notificationRepo := postgres.NewNotificationRepository(s.deps.DB)
+			outbox := notify.NewOutboxWriter(notificationRepo)
+			commsService := service.NewCommunicationService(
+				courseRepo, enrollmentRepo, userRepo,
+				announcementRepo, threadRepo, postRepo, dmConvRepo, dmMsgRepo, notificationRepo, outbox,
+			)
+			commsHandler := handlers.NewCommunicationHandler(commsService)
+
 			v1.GET("/categories", courseHandler.ListCategories)
 			v1.POST("/categories",
 				middleware.BearerAuth(tokenManager),
@@ -270,6 +284,21 @@ func (s *Server) registerRoutes() {
 				middleware.BearerAuth(tokenManager),
 				middleware.RequirePermission(rbac.PermCoursesRead),
 				liveHandler.ListCalendar,
+			)
+			v1.GET("/me/conversations",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermProfileRead),
+				commsHandler.ListConversations,
+			)
+			v1.GET("/me/notifications",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermProfileRead),
+				commsHandler.ListNotifications,
+			)
+			v1.POST("/me/notifications/read-all",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermProfileRead),
+				commsHandler.MarkAllNotificationsRead,
 			)
 
 			coursesGroup := v1.Group("/courses")
@@ -306,6 +335,51 @@ func (s *Server) registerRoutes() {
 
 				coursesGroup.POST("/:id/sessions", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), liveHandler.CreateSession)
 				coursesGroup.GET("/:id/sessions", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), liveHandler.ListCourseSessions)
+
+				coursesGroup.POST("/:id/announcements", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), commsHandler.CreateAnnouncement)
+				coursesGroup.GET("/:id/announcements", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.ListAnnouncements)
+				coursesGroup.POST("/:id/threads", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.CreateThread)
+				coursesGroup.GET("/:id/threads", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.ListThreads)
+			}
+
+			announcementsGroup := v1.Group("/announcements")
+			announcementsGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				announcementsGroup.GET("/:announcementId", middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.GetAnnouncement)
+				announcementsGroup.PATCH("/:announcementId", middleware.RequirePermission(rbac.PermCoursesWrite), commsHandler.UpdateAnnouncement)
+				announcementsGroup.POST("/:announcementId/publish", middleware.RequirePermission(rbac.PermCoursesWrite), commsHandler.PublishAnnouncement)
+				announcementsGroup.DELETE("/:announcementId", middleware.RequirePermission(rbac.PermCoursesWrite), commsHandler.DeleteAnnouncement)
+			}
+
+			threadsGroup := v1.Group("/threads")
+			threadsGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				threadsGroup.GET("/:threadId", middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.GetThread)
+				threadsGroup.POST("/:threadId/lock", middleware.RequirePermission(rbac.PermCoursesWrite), commsHandler.LockThread)
+				threadsGroup.POST("/:threadId/posts", middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.CreatePost)
+				threadsGroup.GET("/:threadId/posts", middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.ListPosts)
+			}
+
+			postsGroup := v1.Group("/posts")
+			postsGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				postsGroup.PATCH("/:postId", middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.UpdatePost)
+				postsGroup.DELETE("/:postId", middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.DeletePost)
+			}
+
+			conversationsGroup := v1.Group("/conversations")
+			conversationsGroup.Use(middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermProfileRead))
+			{
+				conversationsGroup.POST("", commsHandler.StartConversation)
+				conversationsGroup.GET("/:id/messages", commsHandler.ListMessages)
+				conversationsGroup.POST("/:id/messages", commsHandler.SendMessage)
+				conversationsGroup.POST("/:id/read", commsHandler.MarkConversationRead)
+			}
+
+			notificationsGroup := v1.Group("/notifications")
+			notificationsGroup.Use(middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermProfileRead))
+			{
+				notificationsGroup.POST("/:id/read", commsHandler.MarkNotificationRead)
 			}
 
 			sessionsGroup := v1.Group("/sessions")

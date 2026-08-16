@@ -1,5 +1,50 @@
 basePath: /
 definitions:
+  handlers.AnnouncementEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.AnnouncementResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AnnouncementListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.AnnouncementResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.AnnouncementResponse:
+    properties:
+      author_id:
+        type: string
+      author_name:
+        type: string
+      body:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      pinned:
+        type: boolean
+      published_at:
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handlers.AssignmentEnvelope:
     properties:
       data:
@@ -271,6 +316,41 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.ConversationEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.ConversationResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ConversationListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.ConversationResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ConversationResponse:
+    properties:
+      id:
+        type: string
+      last_message:
+        type: string
+      other_user_id:
+        type: string
+      other_user_name:
+        type: string
+      unread_count:
+        type: integer
+      updated_at:
+        type: string
+    type: object
   handlers.CourseAccessEnvelope:
     properties:
       data:
@@ -425,6 +505,39 @@ definitions:
         items:
           $ref: '#/definitions/handlers.ModuleResponse'
         type: array
+    type: object
+  handlers.DMMessageEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.DMMessageResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.DMMessageListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.DMMessageResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.DMMessageResponse:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      read_at:
+        type: string
+      sender_id:
+        type: string
     type: object
   handlers.DashboardProgressEnvelope:
     properties:
@@ -988,6 +1101,37 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.NotificationListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.NotificationResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.NotificationResponse:
+    properties:
+      body:
+        type: string
+      created_at:
+        type: string
+      event_type:
+        type: string
+      id:
+        type: string
+      payload:
+        additionalProperties:
+          type: string
+        type: object
+      read_at:
+        type: string
+      subject:
+        type: string
+    type: object
   handlers.OrganizationEnvelope:
     properties:
       data:
@@ -1019,6 +1163,45 @@ definitions:
       name:
         type: string
       slug:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  handlers.PostEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.PostResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.PostListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.PostResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.PostResponse:
+    properties:
+      author_id:
+        type: string
+      author_name:
+        type: string
+      body:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      parent_id:
+        type: string
+      thread_id:
         type: string
       updated_at:
         type: string
@@ -1222,6 +1405,47 @@ definitions:
       user_id:
         type: string
     type: object
+  handlers.ThreadEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.ThreadResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ThreadListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.ThreadResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ThreadResponse:
+    properties:
+      author_id:
+        type: string
+      author_name:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: string
+      post_count:
+        type: integer
+      status:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+    type: object
   handlers.TokenPairResponse:
     properties:
       access_token:
@@ -1341,6 +1565,17 @@ definitions:
       role:
         example: teacher
         type: string
+    type: object
+  handlers.announcementBody:
+    properties:
+      body:
+        type: string
+      pinned:
+        type: boolean
+      title:
+        type: string
+    required:
+    - title
     type: object
   handlers.completeMediaRequest:
     properties:
@@ -1548,6 +1783,13 @@ definitions:
     required:
     - title
     type: object
+  handlers.dmStartBody:
+    properties:
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
   handlers.enrollRequest:
     properties:
       invite_code:
@@ -1607,6 +1849,22 @@ definitions:
         type: string
     required:
     - status
+    type: object
+  handlers.messageBody:
+    properties:
+      body:
+        type: string
+    required:
+    - body
+    type: object
+  handlers.postBody:
+    properties:
+      body:
+        type: string
+      parent_id:
+        type: string
+    required:
+    - body
     type: object
   handlers.quizOptionRequest:
     properties:
@@ -1717,6 +1975,16 @@ definitions:
         type: array
     required:
     - tags
+    type: object
+  handlers.threadBody:
+    properties:
+      body:
+        type: string
+      title:
+        type: string
+    required:
+    - body
+    - title
     type: object
   handlers.updateAssignmentRequest:
     properties:
@@ -2110,6 +2378,90 @@ paths:
       summary: Update user (admin)
       tags:
       - admin
+  /api/v1/announcements/{announcementId}:
+    delete:
+      parameters:
+      - description: Announcement ID
+        in: path
+        name: announcementId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete announcement
+      tags:
+      - communication
+    get:
+      parameters:
+      - description: Announcement ID
+        in: path
+        name: announcementId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AnnouncementEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get announcement
+      tags:
+      - communication
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Announcement ID
+        in: path
+        name: announcementId
+        required: true
+        type: string
+      - description: Announcement
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.announcementBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AnnouncementEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Update draft announcement
+      tags:
+      - communication
+  /api/v1/announcements/{announcementId}/publish:
+    post:
+      parameters:
+      - description: Announcement ID
+        in: path
+        name: announcementId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AnnouncementEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Publish announcement
+      tags:
+      - communication
   /api/v1/assignments/{assignmentId}:
     get:
       parameters:
@@ -2632,6 +2984,102 @@ paths:
       summary: Create category
       tags:
       - courses
+  /api/v1/conversations:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Recipient
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.dmStartBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.ConversationEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Start or get DM conversation
+      tags:
+      - communication
+  /api/v1/conversations/{id}/messages:
+    get:
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.DMMessageListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List DM messages
+      tags:
+      - communication
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Message
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.messageBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.DMMessageEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Send DM message
+      tags:
+      - communication
+  /api/v1/conversations/{id}/read:
+    post:
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Mark DM conversation read
+      tags:
+      - communication
   /api/v1/courses:
     get:
       description: Public catalog defaults to published. Teachers/admins may see drafts
@@ -2789,6 +3237,53 @@ paths:
       summary: Check course content access
       tags:
       - enrollments
+  /api/v1/courses/{id}/announcements:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.AnnouncementListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List course announcements
+      tags:
+      - communication
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Announcement
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.announcementBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.AnnouncementEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create course announcement
+      tags:
+      - communication
   /api/v1/courses/{id}/archive:
     post:
       parameters:
@@ -3289,6 +3784,53 @@ paths:
       summary: Replace course tags
       tags:
       - courses
+  /api/v1/courses/{id}/threads:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ThreadListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List discussion threads
+      tags:
+      - communication
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Thread
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.threadBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.ThreadEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Create discussion thread
+      tags:
+      - communication
   /api/v1/lessons/{lessonId}:
     delete:
       parameters:
@@ -3512,6 +4054,20 @@ paths:
       summary: Calendar feed for teacher/student sessions
       tags:
       - live
+  /api/v1/me/conversations:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ConversationListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List my DM conversations
+      tags:
+      - communication
   /api/v1/me/enrollments:
     get:
       parameters:
@@ -3562,6 +4118,45 @@ paths:
       summary: List my media assets
       tags:
       - media
+  /api/v1/me/notifications:
+    get:
+      parameters:
+      - description: Unread only
+        in: query
+        name: unread_only
+        type: boolean
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.NotificationListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List in-app notifications
+      tags:
+      - communication
+  /api/v1/me/notifications/read-all:
+    post:
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Mark all notifications read
+      tags:
+      - communication
   /api/v1/me/progress:
     get:
       produces:
@@ -3796,6 +4391,24 @@ paths:
       summary: Reorder lessons in a module
       tags:
       - curriculum
+  /api/v1/notifications/{id}/read:
+    post:
+      parameters:
+      - description: Notification ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Mark notification read
+      tags:
+      - communication
   /api/v1/organizations:
     get:
       produces:
@@ -4113,6 +4726,51 @@ paths:
       summary: Accept organization invite
       tags:
       - organizations
+  /api/v1/posts/{postId}:
+    delete:
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Delete discussion post
+      tags:
+      - communication
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Post ID
+        in: path
+        name: postId
+        required: true
+        type: string
+      - description: Post
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.postBody'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PostEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Edit discussion post
+      tags:
+      - communication
   /api/v1/questions/{questionId}:
     delete:
       parameters:
@@ -4588,6 +5246,93 @@ paths:
       summary: Grade assignment submission
       tags:
       - assessments
+  /api/v1/threads/{threadId}:
+    get:
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ThreadEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Get discussion thread
+      tags:
+      - communication
+  /api/v1/threads/{threadId}/lock:
+    post:
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ThreadEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Lock discussion thread
+      tags:
+      - communication
+  /api/v1/threads/{threadId}/posts:
+    get:
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PostListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List thread posts
+      tags:
+      - communication
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Thread ID
+        in: path
+        name: threadId
+        required: true
+        type: string
+      - description: Post
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.postBody'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.PostEnvelope'
+      security:
+      - BearerAuth: []
+      summary: Reply in discussion thread
+      tags:
+      - communication
   /api/v1/users/me:
     get:
       description: Return the authenticated user's profile
