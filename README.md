@@ -143,8 +143,9 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `POST` | `/api/v1/media/uploads` | Presigned upload intent |
 | `GET` | `/api/v1/me/calendar` | Live session calendar feed |
 | `GET` | `/api/v1/me/notifications` | In-app notification feed |
+| `GET` | `/api/v1/certificates/verify/:code` | Public certificate verify |
 
-Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md), [curriculum](docs/api/curriculum.md), [enrollment](docs/api/enrollment.md), [progress](docs/api/progress.md), [assessments](docs/api/assessments.md), [media](docs/api/media.md), [live](docs/api/live.md), [communication](docs/api/communication.md)).
+Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md), [curriculum](docs/api/curriculum.md), [enrollment](docs/api/enrollment.md), [progress](docs/api/progress.md), [assessments](docs/api/assessments.md), [media](docs/api/media.md), [live](docs/api/live.md), [communication](docs/api/communication.md), [certificates](docs/api/certificates.md)).
 
 Responses use a shared envelope:
 

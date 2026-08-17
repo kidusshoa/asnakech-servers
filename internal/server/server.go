@@ -263,6 +263,13 @@ func (s *Server) registerRoutes() {
 			)
 			commsHandler := handlers.NewCommunicationHandler(commsService)
 
+			certRepo := postgres.NewCertificateRepository(s.deps.DB)
+			certService := service.NewCertificateService(
+				courseRepo, enrollmentRepo, userRepo, courseProgressRepo, certRepo,
+				quizRepo, assignmentRepo, attemptRepo, submissionRepo,
+			)
+			certHandler := handlers.NewCertificateHandler(certService)
+
 			v1.GET("/categories", courseHandler.ListCategories)
 			v1.POST("/categories",
 				middleware.BearerAuth(tokenManager),
@@ -300,6 +307,17 @@ func (s *Server) registerRoutes() {
 				middleware.RequirePermission(rbac.PermProfileRead),
 				commsHandler.MarkAllNotificationsRead,
 			)
+			v1.GET("/me/certificates",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesRead),
+				certHandler.ListMyCertificates,
+			)
+			v1.GET("/me/transcript",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesRead),
+				certHandler.MyTranscript,
+			)
+			v1.GET("/certificates/verify/:code", certHandler.VerifyCertificate)
 
 			coursesGroup := v1.Group("/courses")
 			{
@@ -340,6 +358,18 @@ func (s *Server) registerRoutes() {
 				coursesGroup.GET("/:id/announcements", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.ListAnnouncements)
 				coursesGroup.POST("/:id/threads", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.CreateThread)
 				coursesGroup.GET("/:id/threads", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.ListThreads)
+
+				coursesGroup.POST("/:id/certificate", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), certHandler.IssueCertificate)
+				coursesGroup.GET("/:id/certificates", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), certHandler.ListCourseCertificates)
+				coursesGroup.GET("/:id/transcript/:userId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), certHandler.UserCourseTranscript)
+			}
+
+			certificatesGroup := v1.Group("/certificates")
+			certificatesGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				certificatesGroup.GET("/:certificateId", middleware.RequirePermission(rbac.PermCoursesRead), certHandler.GetCertificate)
+				certificatesGroup.GET("/:certificateId/download", middleware.RequirePermission(rbac.PermCoursesRead), certHandler.DownloadCertificate)
+				certificatesGroup.POST("/:certificateId/revoke", middleware.RequirePermission(rbac.PermCoursesWrite), certHandler.RevokeCertificate)
 			}
 
 			announcementsGroup := v1.Group("/announcements")

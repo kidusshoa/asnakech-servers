@@ -1245,6 +1245,133 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/certificates/verify/{code}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Verify certificate by code (public)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Verification code",
+                        "name": "code",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CertificateVerifyEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/certificates/{certificateId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Get certificate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Certificate ID",
+                        "name": "certificateId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CertificateEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/certificates/{certificateId}/download": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/pdf"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Download certificate PDF",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Certificate ID",
+                        "name": "certificateId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/certificates/{certificateId}/revoke": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Revoke certificate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Certificate ID",
+                        "name": "certificateId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CertificateEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/conversations": {
             "post": {
                 "security": [
@@ -1828,6 +1955,83 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/handlers.AssignmentEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/certificate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Issue completion certificate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Optional user_id for teacher issue",
+                        "name": "body",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.issueCertificateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CertificateEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/certificates": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "List certificates issued for a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CertificateListEnvelope"
                         }
                     }
                 }
@@ -2609,6 +2813,46 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/courses/{id}/transcript/{userId}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Export learner transcript for a course",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.TranscriptEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/lessons/{lessonId}": {
             "delete": {
                 "security": [
@@ -2969,6 +3213,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/me/certificates": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "List my certificates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CertificateListEnvelope"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/me/conversations": {
             "get": {
                 "security": [
@@ -3159,6 +3427,30 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.DashboardProgressEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/me/transcript": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "certificates"
+                ],
+                "summary": "Export my transcript",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.TranscriptEnvelope"
                         }
                     }
                 }
@@ -5682,6 +5974,109 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CertificateEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.CertificateResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.CertificateListEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.CertificateResponse"
+                    }
+                },
+                "meta": {
+                    "$ref": "#/definitions/response.Meta"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.CertificateResponse": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "course_slug": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "issued_at": {
+                    "type": "string"
+                },
+                "learner_name": {
+                    "type": "string"
+                },
+                "public_url": {
+                    "type": "string"
+                },
+                "revoked_at": {
+                    "type": "string"
+                },
+                "user_email": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                },
+                "verification_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.CertificateVerifyEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.CertificateVerifyResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.CertificateVerifyResponse": {
+            "type": "object",
+            "properties": {
+                "course_title": {
+                    "type": "string"
+                },
+                "issued_at": {
+                    "type": "string"
+                },
+                "learner_name": {
+                    "type": "string"
+                },
+                "revoked_at": {
+                    "type": "string"
+                },
+                "valid": {
+                    "type": "boolean"
+                },
+                "verification_code": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.ContentBlockEnvelope": {
             "type": "object",
             "properties": {
@@ -7455,6 +7850,76 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.TranscriptCourseResponse": {
+            "type": "object",
+            "properties": {
+                "assignments": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.transcriptAssignmentScore"
+                    }
+                },
+                "certificate": {
+                    "$ref": "#/definitions/handlers.transcriptCertificateRef"
+                },
+                "completed_at": {
+                    "type": "string"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_slug": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "progress_percent": {
+                    "type": "integer"
+                },
+                "quizzes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.transcriptQuizScore"
+                    }
+                }
+            }
+        },
+        "handlers.TranscriptEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.TranscriptResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.TranscriptResponse": {
+            "type": "object",
+            "properties": {
+                "courses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.TranscriptCourseResponse"
+                    }
+                },
+                "generated_at": {
+                    "type": "string"
+                },
+                "user_email": {
+                    "type": "string"
+                },
+                "user_full_name": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.UpsertProgressData": {
             "type": "object",
             "properties": {
@@ -8005,6 +8470,14 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.issueCertificateRequest": {
+            "type": "object",
+            "properties": {
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.loginRequest": {
             "type": "object",
             "required": [
@@ -8249,6 +8722,63 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.transcriptAssignmentScore": {
+            "type": "object",
+            "properties": {
+                "assignment_id": {
+                    "type": "string"
+                },
+                "assignment_title": {
+                    "type": "string"
+                },
+                "max_score": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "integer"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.transcriptCertificateRef": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "issued_at": {
+                    "type": "string"
+                },
+                "revoked": {
+                    "type": "boolean"
+                },
+                "verification_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.transcriptQuizScore": {
+            "type": "object",
+            "properties": {
+                "attempts": {
+                    "type": "integer"
+                },
+                "passed": {
+                    "type": "boolean"
+                },
+                "percent": {
+                    "type": "integer"
+                },
+                "quiz_id": {
+                    "type": "string"
+                },
+                "quiz_title": {
                     "type": "string"
                 }
             }

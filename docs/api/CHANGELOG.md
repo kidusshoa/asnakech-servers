@@ -20,3 +20,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Media: presigned S3/MinIO uploads, purpose limits, video metadata, virus-scan hook, CDN URLs
 - Live: class sessions, schedules, attendance, join-link adapters, calendar feed
 - Communication: announcements, discussion threads, DMs, notification outbox
+- Certificates: PDF completion certs, verification codes, transcript export
