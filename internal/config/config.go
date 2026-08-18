@@ -46,6 +46,14 @@ type Config struct {
 	ChapaWebhookSecret     string
 
 	FeatureFlags []string
+
+	TrustedProxies       []string
+	RateLimitGlobalRPS   float64
+	RateLimitGlobalBurst int
+	RateLimitAuthRPS     float64
+	RateLimitAuthBurst   int
+	MetricsEnabled       bool
+	SecurityHSTS         bool
 }
 
 // Load reads optional .env, then environment variables into Config.
@@ -88,6 +96,14 @@ func Load() (*Config, error) {
 		ChapaWebhookSecret:     getEnv("CHAPA_WEBHOOK_SECRET", ""),
 
 		FeatureFlags: splitFeatureFlags(getEnv("FEATURE_FLAGS", "")),
+
+		TrustedProxies:       splitOptionalCSV(getEnv("TRUSTED_PROXIES", "")),
+		RateLimitGlobalRPS:   getEnvAsFloat("RATE_LIMIT_GLOBAL_RPS", 100),
+		RateLimitGlobalBurst: getEnvAsInt("RATE_LIMIT_GLOBAL_BURST", 300),
+		RateLimitAuthRPS:     getEnvAsFloat("RATE_LIMIT_AUTH_RPS", 2),
+		RateLimitAuthBurst:   getEnvAsInt("RATE_LIMIT_AUTH_BURST", 10),
+		MetricsEnabled:       getEnvAsBool("METRICS_ENABLED", true),
+		SecurityHSTS:         getEnvAsBool("SECURITY_HSTS", false),
 	}
 
 	if err := cfg.validate(); err != nil {
@@ -117,6 +133,15 @@ func (c *Config) IsDevelopment() bool {
 func getEnv(key, defaultValue string) string {
 	if value, exists := os.LookupEnv(key); exists {
 		return value
+	}
+	return defaultValue
+}
+
+func getEnvAsFloat(key string, defaultValue float64) float64 {
+	if value, exists := os.LookupEnv(key); exists {
+		if f, err := strconv.ParseFloat(value, 64); err == nil {
+			return f
+		}
 	}
 	return defaultValue
 }
@@ -176,6 +201,22 @@ func splitCSV(value string) []string {
 	}
 	if len(out) == 0 {
 		return []string{"*"}
+	}
+	return out
+}
+
+func splitOptionalCSV(value string) []string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
 	}
 	return out
 }

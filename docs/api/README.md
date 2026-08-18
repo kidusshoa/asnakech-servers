@@ -30,6 +30,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 | [payments.md](./payments.md) | Checkout, orders, coupons, webhooks |
 | [analytics.md](./analytics.md) | Admin KPIs, reports, course analytics |
 | [discovery.md](./discovery.md) | Search, i18n, recommendations, feature flags |
+| [deprecation.md](./deprecation.md) | v1 sunset policy and v2 notes |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

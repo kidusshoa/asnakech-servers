@@ -41,7 +41,16 @@ func (l *IPRateLimiter) get(ip string) *rate.Limiter {
 
 // Limit returns middleware that rejects excess requests with 429.
 func (l *IPRateLimiter) Limit() gin.HandlerFunc {
+	return l.LimitExcept()
+}
+
+// LimitExcept skips rate limiting for matching paths (exact or prefix).
+func (l *IPRateLimiter) LimitExcept(skipPaths ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		if SkipPaths(c.Request.URL.Path, skipPaths) {
+			c.Next()
+			return
+		}
 		if !l.get(c.ClientIP()).Allow() {
 			c.Header("Retry-After", "1")
 			response.FailCode(c, http.StatusTooManyRequests, apperr.CodeRateLimited, "too many requests")

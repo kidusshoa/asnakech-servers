@@ -33,7 +33,33 @@ git push origin v0.2.0
 ```
 
 6. Create a GitHub Release from the tag; paste the changelog section as the body
-7. (Later stages) trigger deploy from the tag
+7. Trigger deploy from the tag (see [CI/CD](#cicd) below)
+
+## CI/CD
+
+**Continuous integration** runs on every push/PR to `master` via [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
+
+| Step | Command / action |
+|------|------------------|
+| Format | `gofmt` — no diffs |
+| Vet | `go vet ./...` |
+| Test | `go test -race ./...` |
+| Build | `go build ./cmd/api` |
+| OpenAPI | `make docs-check` |
+| Migrations | up → down all → up against Postgres 16 |
+
+Local equivalent: `make ci` (requires Postgres for `docs-check` only if swagger changed; migration smoke is CI-only unless you run migrate manually).
+
+**Continuous delivery (sketch)**
+
+1. Tag `vX.Y.Z` on `master` after CI is green
+2. Build and push container (`Dockerfile`, Go 1.25)
+3. Run `make migrate-up` as a release job
+4. Rolling deploy; watch `/ready` and scrape `/metrics`
+
+Operational details: [docs/ops/RUNBOOK.md](../ops/RUNBOOK.md).
+
+**API deprecation:** [docs/api/deprecation.md](../api/deprecation.md) — sunset windows before removing v1 endpoints.
 
 ## Changelog rules
 

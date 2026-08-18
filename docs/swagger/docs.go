@@ -6491,6 +6491,26 @@ const docTemplate = `{
                 }
             }
         },
+        "/metrics": {
+            "get": {
+                "description": "Prometheus text exposition format. Restrict network access in production.",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "ops"
+                ],
+                "summary": "Prometheus metrics",
+                "responses": {
+                    "200": {
+                        "description": "Prometheus text format",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/ready": {
             "get": {
                 "description": "Returns OK when configured dependencies are reachable. Not under /api/v1.",

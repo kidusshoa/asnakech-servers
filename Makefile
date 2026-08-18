@@ -1,4 +1,4 @@
-.PHONY: all build run test clean deps install dev generate up down logs tidy fmt \
+.PHONY: all build run test clean deps install dev generate up down logs tidy fmt fmt-check vet ci \
 	tools migrate-up migrate-down migrate-version migrate-force migrate-create up-infra ps \
 	docs docs-check
 
@@ -59,6 +59,15 @@ tidy:
 
 fmt:
 	$(GOCMD) fmt ./...
+
+fmt-check:
+	@test -z "$$($(GOCMD) fmt ./...)"
+
+vet:
+	$(GOCMD) vet ./...
+
+ci: fmt-check vet test build docs-check
+	@echo "CI checks passed"
 
 # --- OpenAPI / Swagger ------------------------------------------------------
 

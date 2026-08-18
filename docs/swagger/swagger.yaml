@@ -6973,6 +6973,19 @@ paths:
       summary: Liveness probe
       tags:
       - health
+  /metrics:
+    get:
+      description: Prometheus text exposition format. Restrict network access in production.
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Prometheus text format
+          schema:
+            type: string
+      summary: Prometheus metrics
+      tags:
+      - ops
   /ready:
     get:
       description: Returns OK when configured dependencies are reachable. Not under

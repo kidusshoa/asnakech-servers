@@ -24,3 +24,5 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Payments: checkout, orders, coupons, provider webhooks, paid-course enrollment gate
 - Analytics: admin overview/reports, course-level teacher analytics
 - Discovery: unified search, recommendations, locales/messages, feature flags, parent links
+- Ops: `/metrics` (Prometheus text), security headers, configurable global/auth rate limits
+- Docs: [deprecation policy](./deprecation.md), [ops runbook](../ops/RUNBOOK.md)

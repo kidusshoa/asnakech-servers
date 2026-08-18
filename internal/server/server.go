@@ -16,6 +16,7 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/middleware"
 	"github.com/asnakech/asnakech-servers/internal/notify"
 	"github.com/asnakech/asnakech-servers/internal/payment"
+	"github.com/asnakech/asnakech-servers/internal/platform/metrics"
 	"github.com/asnakech/asnakech-servers/internal/platform/ready"
 	"github.com/asnakech/asnakech-servers/internal/rbac"
 	"github.com/asnakech/asnakech-servers/internal/repository/postgres"
@@ -50,14 +51,30 @@ func New(cfg *config.Config, logger zerolog.Logger, deps Dependencies) *Server {
 	}
 
 	router := gin.New()
+	if err := router.SetTrustedProxies(cfg.TrustedProxies); err != nil {
+		logger.Warn().Err(err).Msg("trusted proxy config ignored")
+	}
 	router.Use(gin.Recovery())
 	router.Use(middleware.RequestID())
 	router.Use(middleware.Locale())
+	router.Use(middleware.SecurityHeaders(middleware.SecurityHeadersConfig{
+		HSTS: cfg.SecurityHSTS,
+	}))
+	if cfg.MetricsEnabled {
+		metrics.Default.SetVersion(cfg.AppVersion)
+		router.Use(middleware.HTTPMetrics(metrics.Default))
+	}
 	router.Use(middleware.ZerologRequest(logger))
 	router.Use(middleware.CORS(middleware.CORSConfig{
 		AllowedOrigins:   cfg.CORSOrigins,
 		AllowCredentials: cfg.CORSCredentials,
 	}))
+	if cfg.RateLimitGlobalRPS > 0 {
+		globalLimiter := middleware.NewIPRateLimiter(cfg.RateLimitGlobalRPS, cfg.RateLimitGlobalBurst)
+		router.Use(globalLimiter.LimitExcept(
+			"/health", "/ready", "/metrics", "/swagger",
+		))
+	}
 
 	s := &Server{
 		cfg:    cfg,
@@ -90,6 +107,10 @@ func (s *Server) registerRoutes() {
 
 	s.router.GET("/health", healthHandler.HealthCheck)
 	s.router.GET("/ready", healthHandler.ReadyCheck)
+	if s.cfg.MetricsEnabled {
+		metricsHandler := handlers.NewMetricsHandler(metrics.Default)
+		s.router.GET("/metrics", metricsHandler.Prometheus)
+	}
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	v1 := s.router.Group("/api/v1")
@@ -150,7 +171,7 @@ func (s *Server) registerRoutes() {
 			parentService := service.NewParentService(userRepo, parentLinkRepo)
 			discoveryHandler := handlers.NewDiscoveryHandler(discoveryService, parentService)
 
-			authLimiter := middleware.NewIPRateLimiter(2, 10)
+			authLimiter := middleware.NewIPRateLimiter(s.cfg.RateLimitAuthRPS, s.cfg.RateLimitAuthBurst)
 			authGroup := v1.Group("/auth")
 			authGroup.Use(authLimiter.Limit())
 			{

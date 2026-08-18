@@ -72,6 +72,46 @@ func TestCORSAllowsConfiguredOrigin(t *testing.T) {
 	}
 }
 
+func TestSecurityHeadersApplied(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.Use(middleware.SecurityHeaders(middleware.SecurityHeadersConfig{HSTS: true}))
+	r.GET("/ping", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/ping", nil)
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+
+	for _, hdr := range []string{
+		"X-Content-Type-Options",
+		"X-Frame-Options",
+		"Referrer-Policy",
+		"Content-Security-Policy",
+		"Strict-Transport-Security",
+	} {
+		if got := w.Header().Get(hdr); got == "" {
+			t.Fatalf("expected %s header", hdr)
+		}
+	}
+}
+
+func TestSkipPaths(t *testing.T) {
+	skips := []string{"/health", "/metrics", "/swagger"}
+	cases := map[string]bool{
+		"/health":              true,
+		"/metrics":             true,
+		"/swagger/index.html":  true,
+		"/api/v1/courses":      false,
+	}
+	for path, want := range cases {
+		if got := middleware.SkipPaths(path, skips); got != want {
+			t.Fatalf("SkipPaths(%q) = %v, want %v", path, got, want)
+		}
+	}
+}
+
 func TestCORSStarDisablesCredentials(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()

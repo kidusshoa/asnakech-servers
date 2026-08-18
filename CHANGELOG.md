@@ -35,12 +35,19 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Payments: orders, coupons, manual/Stripe/Chapa adapters, webhooks with idempotency, paid-course checkout
 - Analytics: admin overview, enrollment/revenue/user reports, per-course teacher analytics
 - Discovery: FTS search, recommendations, i18n (en/am), feature flags, parent-student links
+- Production ops: security headers, global rate limits, Prometheus `/metrics`, GitHub Actions CI
+- Ops docs: `docs/ops/RUNBOOK.md`, API deprecation policy
 
 ### Changed
+
+- Dockerfile builder image updated to Go 1.25 (matches `go.mod`)
+- Auth rate limits configurable via `RATE_LIMIT_AUTH_*` env vars
 
 ### Fixed
 
 ### Security
+
+- Baseline security headers on all responses (`X-Content-Type-Options`, CSP, frame denial, optional HSTS)
 
 ## [0.1.0] - 2026-08-10
 

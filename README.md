@@ -2,13 +2,15 @@
 
 Backend API for the Asnakech online education platform. Built with Go and Gin as a **modular monolith** (domain → service → repository → handler).
 
-> Status: foundation stages in progress (architecture, git docs, local stack). Education domains come next.
+> Status: **21-stage roadmap complete** — foundation through production hardening (CI, metrics, runbooks).
+
+See [docs/ops/RUNBOOK.md](docs/ops/RUNBOOK.md) for deploy, migrations, backups, and incident response.
 
 ## Getting Started
 
 ### Prerequisites
 
-- Go 1.21 or higher
+- Go 1.25 or higher
 - Git
 - Docker + Docker Compose (optional, for local Postgres / Redis / MinIO)
 
@@ -54,8 +56,10 @@ If Compose fails with **port is already allocated**, another stack is using that
 │   ├── domain/              # Business entities (growing)
 │   ├── handlers/            # HTTP handlers (thin)
 │   ├── logging/             # Zerolog setup
-│   ├── middleware/          # CORS, request ID, request logs
-│   ├── platform/ready/      # Dependency readiness checks
+│   ├── middleware/          # CORS, request ID, security, rate limits, metrics
+│   ├── platform/
+│   │   ├── metrics/         # Prometheus text registry
+│   │   └── ready/           # Dependency readiness checks
 │   ├── repository/          # Persistence interfaces
 │   │   └── postgres/        # Postgres implementations
 │   ├── response/            # Standard JSON envelope
@@ -66,8 +70,9 @@ If Compose fails with **port is already allocated**, another stack is using that
 │   ├── api/                 # Envelope, versioning, API changelog
 │   ├── swagger/             # Generated OpenAPI (swag)
 │   ├── git/                 # Contributing, branching, commits, releases
+│   ├── ops/                 # Runbook (deploy, backups, incidents)
 │   └── db/                  # Schema conventions
-├── .github/                 # PR / issue templates, CODEOWNERS
+├── .github/workflows/       # CI (test, vet, docs-check, migrations)
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .air.toml
@@ -108,6 +113,9 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `make migrate-create NAME=…` | Scaffold a new migration pair |
 | `make docs` | Regenerate OpenAPI into `docs/swagger/` |
 | `make docs-check` | Fail if swagger output is stale |
+| `make vet` | Run `go vet` |
+| `make fmt-check` | Fail if sources need `gofmt` |
+| `make ci` | fmt-check + vet + test + build + docs-check |
 
 ## API Endpoints
 
@@ -115,6 +123,7 @@ If Compose fails with **port is already allocated**, another stack is using that
 |--------|------|-------------|
 | `GET` | `/health` | Liveness / version |
 | `GET` | `/ready` | Readiness (Postgres, Redis, S3 when configured) |
+| `GET` | `/metrics` | Prometheus metrics (restrict in production) |
 | `GET` | `/swagger/index.html` | Interactive OpenAPI (Swagger UI) |
 | `GET` | `/api/v1/` | Welcome stub |
 | `GET` | `/api/v1/roles` | List seeded platform roles (requires DB) |
@@ -188,12 +197,19 @@ Every response includes an `X-Request-ID` header (generated if the client did no
 | `PAYMENT_WEBHOOK_SECRET` | _(empty)_ | Manual webhook HMAC secret |
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | | Stripe checkout + webhooks |
 | `CHAPA_SECRET_KEY` / `CHAPA_WEBHOOK_SECRET` | | Chapa checkout + webhooks |
+| `RATE_LIMIT_GLOBAL_RPS` | `100` | Global API rate limit (0 = off); skips `/health`, `/ready`, `/metrics`, `/swagger` |
+| `RATE_LIMIT_GLOBAL_BURST` | `300` | Global burst |
+| `RATE_LIMIT_AUTH_RPS` | `2` | Auth endpoint rate limit |
+| `RATE_LIMIT_AUTH_BURST` | `10` | Auth burst |
+| `METRICS_ENABLED` | `true` | Expose `GET /metrics` |
+| `SECURITY_HSTS` | `false` | Send `Strict-Transport-Security` (enable with HTTPS) |
+| `TRUSTED_PROXIES` | _(empty)_ | CIDRs for `X-Forwarded-For` behind load balancers |
 
 Copy `.env.example` → `.env` for local defaults matching Compose.
 
 ## Roadmap
 
-Expansion is tracked in 21 stages (architecture → production hardening), covering auth, courses, enrollment, assessments, media, live classes, payments, analytics, OpenAPI, and git/release docs.
+All **21 stages** are implemented (architecture → production hardening). See [CHANGELOG.md](CHANGELOG.md) for feature history.
 
 ## Contributing
 
