@@ -21,10 +21,10 @@ func NewDiscoveryHandler(discovery *service.DiscoveryService, parent *service.Pa
 }
 
 type SearchResultsResponse struct {
-	Query      string                     `json:"query"`
-	Courses    []SearchCourseHitResponse  `json:"courses"`
-	Categories []CategoryResponse         `json:"categories"`
-	Teachers   []SearchTeacherResponse    `json:"teachers"`
+	Query      string                    `json:"query"`
+	Courses    []SearchCourseHitResponse `json:"courses"`
+	Categories []CategoryResponse        `json:"categories"`
+	Teachers   []SearchTeacherResponse   `json:"teachers"`
 }
 
 type SearchCourseHitResponse struct {

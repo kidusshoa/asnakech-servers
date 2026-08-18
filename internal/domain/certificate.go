@@ -33,23 +33,23 @@ type CertificateVerify struct {
 
 // Transcript is an exportable grade and progress summary.
 type Transcript struct {
-	UserID      string
-	UserEmail   string
+	UserID       string
+	UserEmail    string
 	UserFullName string
-	GeneratedAt time.Time
-	Courses     []TranscriptCourse
+	GeneratedAt  time.Time
+	Courses      []TranscriptCourse
 }
 
 // TranscriptCourse is one course row on a transcript.
 type TranscriptCourse struct {
-	CourseID         string
-	CourseTitle      string
-	CourseSlug       string
-	ProgressPercent  int
-	CompletedAt      *time.Time
-	Quizzes          []GradebookQuizScore
-	Assignments      []GradebookAssignmentScore
-	Certificate      *TranscriptCertificate
+	CourseID        string
+	CourseTitle     string
+	CourseSlug      string
+	ProgressPercent int
+	CompletedAt     *time.Time
+	Quizzes         []GradebookQuizScore
+	Assignments     []GradebookAssignmentScore
+	Certificate     *TranscriptCertificate
 }
 
 // TranscriptCertificate summarizes an issued credential on a transcript.

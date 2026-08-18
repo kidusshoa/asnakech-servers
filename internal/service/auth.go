@@ -12,19 +12,19 @@ import (
 )
 
 const (
-	minPasswordLen           = 8
-	emailVerificationTTL     = 48 * time.Hour
-	passwordResetTTL         = 1 * time.Hour
+	minPasswordLen       = 8
+	emailVerificationTTL = 48 * time.Hour
+	passwordResetTTL     = 1 * time.Hour
 )
 
 type AuthService struct {
-	users      repository.UserRepository
-	roles      repository.RoleRepository
-	refresh    repository.RefreshTokenRepository
-	resets     repository.PasswordResetTokenRepository
-	verifies   repository.EmailVerificationTokenRepository
-	tokens     *auth.TokenManager
-	exposeDev  bool
+	users     repository.UserRepository
+	roles     repository.RoleRepository
+	refresh   repository.RefreshTokenRepository
+	resets    repository.PasswordResetTokenRepository
+	verifies  repository.EmailVerificationTokenRepository
+	tokens    *auth.TokenManager
+	exposeDev bool
 }
 
 func NewAuthService(
@@ -67,8 +67,8 @@ type AuthResult struct {
 }
 
 type ForgotPasswordResult struct {
-	Message         string
-	ResetTokenDev   string // only set in development when user exists
+	Message       string
+	ResetTokenDev string // only set in development when user exists
 }
 
 func (s *AuthService) Register(ctx context.Context, in RegisterInput) (*AuthResult, error) {

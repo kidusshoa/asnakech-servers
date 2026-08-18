@@ -6,11 +6,11 @@ import "time"
 type MediaPurpose string
 
 const (
-	MediaPurposeAvatar                MediaPurpose = "avatar"
-	MediaPurposeCourseCover           MediaPurpose = "course_cover"
-	MediaPurposeLessonMedia           MediaPurpose = "lesson_media"
-	MediaPurposeAssignmentAttachment  MediaPurpose = "assignment_attachment"
-	MediaPurposeGeneral               MediaPurpose = "general"
+	MediaPurposeAvatar               MediaPurpose = "avatar"
+	MediaPurposeCourseCover          MediaPurpose = "course_cover"
+	MediaPurposeLessonMedia          MediaPurpose = "lesson_media"
+	MediaPurposeAssignmentAttachment MediaPurpose = "assignment_attachment"
+	MediaPurposeGeneral              MediaPurpose = "general"
 )
 
 // MediaStatus is the asset lifecycle.

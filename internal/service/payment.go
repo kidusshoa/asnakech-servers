@@ -40,10 +40,10 @@ func NewPaymentService(
 }
 
 type CheckoutResult struct {
-	Order          *domain.Order
-	CheckoutURL    string
-	ProviderRef    string
-	ProviderMeta   map[string]string
+	Order        *domain.Order
+	CheckoutURL  string
+	ProviderRef  string
+	ProviderMeta map[string]string
 }
 
 func (s *PaymentService) CreateCheckout(

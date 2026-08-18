@@ -46,22 +46,22 @@ type CertificateVerifyResponse struct {
 }
 
 type TranscriptResponse struct {
-	UserID       string                   `json:"user_id"`
-	UserEmail    string                   `json:"user_email"`
-	UserFullName string                   `json:"user_full_name"`
-	GeneratedAt  string                   `json:"generated_at"`
+	UserID       string                     `json:"user_id"`
+	UserEmail    string                     `json:"user_email"`
+	UserFullName string                     `json:"user_full_name"`
+	GeneratedAt  string                     `json:"generated_at"`
 	Courses      []TranscriptCourseResponse `json:"courses"`
 }
 
 type TranscriptCourseResponse struct {
-	CourseID        string                    `json:"course_id"`
-	CourseTitle     string                    `json:"course_title"`
-	CourseSlug      string                    `json:"course_slug"`
-	ProgressPercent int                       `json:"progress_percent"`
-	CompletedAt     *string                   `json:"completed_at,omitempty"`
-	Quizzes         []transcriptQuizScore     `json:"quizzes"`
+	CourseID        string                      `json:"course_id"`
+	CourseTitle     string                      `json:"course_title"`
+	CourseSlug      string                      `json:"course_slug"`
+	ProgressPercent int                         `json:"progress_percent"`
+	CompletedAt     *string                     `json:"completed_at,omitempty"`
+	Quizzes         []transcriptQuizScore       `json:"quizzes"`
 	Assignments     []transcriptAssignmentScore `json:"assignments"`
-	Certificate     *transcriptCertificateRef `json:"certificate,omitempty"`
+	Certificate     *transcriptCertificateRef   `json:"certificate,omitempty"`
 }
 
 type transcriptQuizScore struct {

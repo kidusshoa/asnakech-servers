@@ -90,8 +90,8 @@ type MeResponse struct {
 }
 
 type MessageData struct {
-	Message        string `json:"message"`
-	ResetTokenDev  string `json:"reset_token,omitempty"`
+	Message       string `json:"message"`
+	ResetTokenDev string `json:"reset_token,omitempty"`
 }
 
 type MessageResponse struct {

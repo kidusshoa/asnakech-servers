@@ -18,10 +18,10 @@ const inviteTTL = 7 * 24 * time.Hour
 var nonSlug = regexp.MustCompile(`[^a-z0-9]+`)
 
 type OrganizationService struct {
-	orgs     repository.OrganizationRepository
-	members  repository.OrganizationMemberRepository
-	invites  repository.OrganizationInviteRepository
-	users    repository.UserRepository
+	orgs      repository.OrganizationRepository
+	members   repository.OrganizationMemberRepository
+	invites   repository.OrganizationInviteRepository
+	users     repository.UserRepository
 	exposeDev bool
 }
 
@@ -48,8 +48,8 @@ type CreateOrganizationInput struct {
 }
 
 type InviteResult struct {
-	Invite     *domain.OrganizationInvite
-	TokenDev   string
+	Invite   *domain.OrganizationInvite
+	TokenDev string
 }
 
 func (s *OrganizationService) Create(ctx context.Context, actorID string, in CreateOrganizationInput) (*domain.Organization, error) {

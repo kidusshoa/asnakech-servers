@@ -19,10 +19,10 @@ func NewAnalyticsHandler(analytics *service.AnalyticsService) *AnalyticsHandler 
 }
 
 type PlatformOverviewResponse struct {
-	GeneratedAt string            `json:"generated_at"`
-	Users       usersOverview     `json:"users"`
-	Courses     coursesOverview   `json:"courses"`
-	Enrollments enrollOverview    `json:"enrollments"`
+	GeneratedAt   string          `json:"generated_at"`
+	Users         usersOverview   `json:"users"`
+	Courses       coursesOverview `json:"courses"`
+	Enrollments   enrollOverview  `json:"enrollments"`
 	Organizations int64           `json:"organizations_total"`
 	Certificates  int64           `json:"certificates_total"`
 	Revenue       revenueOverview `json:"revenue"`
@@ -30,8 +30,8 @@ type PlatformOverviewResponse struct {
 }
 
 type usersOverview struct {
-	Total   int64            `json:"total"`
-	ByRole  map[string]int64 `json:"by_role"`
+	Total  int64            `json:"total"`
+	ByRole map[string]int64 `json:"by_role"`
 }
 
 type coursesOverview struct {
@@ -45,15 +45,15 @@ type enrollOverview struct {
 }
 
 type revenueOverview struct {
-	OrdersPaid  int64  `json:"orders_paid"`
-	TotalCents  int64  `json:"total_cents"`
-	Currency    string `json:"currency"`
+	OrdersPaid int64  `json:"orders_paid"`
+	TotalCents int64  `json:"total_cents"`
+	Currency   string `json:"currency"`
 }
 
 type trendsOverview struct {
-	EnrollmentsLast7Days int64 `json:"enrollments_last_7_days"`
+	EnrollmentsLast7Days  int64 `json:"enrollments_last_7_days"`
 	RevenueLast7DaysCents int64 `json:"revenue_last_7_days_cents"`
-	NewUsersLast7Days    int64 `json:"new_users_last_7_days"`
+	NewUsersLast7Days     int64 `json:"new_users_last_7_days"`
 }
 
 type CourseAnalyticsResponse struct {
@@ -108,12 +108,12 @@ type CourseAnalyticsEnvelope struct {
 }
 
 type EnrollmentReportEnvelope struct {
-	Success bool                        `json:"success" example:"true"`
+	Success bool                          `json:"success" example:"true"`
 	Data    []EnrollmentReportRowResponse `json:"data"`
 }
 
 type RevenueReportEnvelope struct {
-	Success bool                     `json:"success" example:"true"`
+	Success bool                       `json:"success" example:"true"`
 	Data    []RevenueReportRowResponse `json:"data"`
 }
 

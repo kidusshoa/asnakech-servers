@@ -60,7 +60,7 @@ type RolesListResponse struct {
 
 // ErrorResponse is the standard failure envelope.
 type ErrorResponse struct {
-	Success bool               `json:"success" example:"false"`
+	Success bool                `json:"success" example:"false"`
 	Error   *response.ErrorBody `json:"error"`
-	Meta    response.Meta      `json:"meta"`
+	Meta    response.Meta       `json:"meta"`
 }

@@ -23,9 +23,9 @@ type User struct {
 
 // UserListFilter controls admin user listing.
 type UserListFilter struct {
-	Role   RoleCode
-	Query  string
-	Page   int
+	Role    RoleCode
+	Query   string
+	Page    int
 	PerPage int
 }
 

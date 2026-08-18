@@ -64,11 +64,11 @@ type OrganizationListEnvelope struct {
 }
 
 type MemberResponse struct {
-	UserID    string    `json:"user_id"`
-	Email     string    `json:"email"`
-	FullName  string    `json:"full_name"`
-	OrgRole   string    `json:"org_role"`
-	JoinedAt  time.Time `json:"joined_at"`
+	UserID   string    `json:"user_id"`
+	Email    string    `json:"email"`
+	FullName string    `json:"full_name"`
+	OrgRole  string    `json:"org_role"`
+	JoinedAt time.Time `json:"joined_at"`
 }
 
 type MemberListEnvelope struct {

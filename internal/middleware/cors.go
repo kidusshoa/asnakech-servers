@@ -11,7 +11,7 @@ import (
 type CORSConfig struct {
 	// AllowedOrigins is a list of origins. Use "*" only for open public APIs
 	// without credentials. Never combine "*" with AllowCredentials=true.
-	AllowedOrigins []string
+	AllowedOrigins   []string
 	AllowCredentials bool
 }
 

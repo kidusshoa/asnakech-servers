@@ -40,9 +40,9 @@ type stripeWebhookEnvelope struct {
 	Type string `json:"type"`
 	Data struct {
 		Object struct {
-			ID                 string `json:"id"`
-			ClientReferenceID  string `json:"client_reference_id"`
-			PaymentStatus      string `json:"payment_status"`
+			ID                string `json:"id"`
+			ClientReferenceID string `json:"client_reference_id"`
+			PaymentStatus     string `json:"payment_status"`
 		} `json:"object"`
 	} `json:"data"`
 }

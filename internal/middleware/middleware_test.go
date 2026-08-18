@@ -100,10 +100,10 @@ func TestSecurityHeadersApplied(t *testing.T) {
 func TestSkipPaths(t *testing.T) {
 	skips := []string{"/health", "/metrics", "/swagger"}
 	cases := map[string]bool{
-		"/health":              true,
-		"/metrics":             true,
-		"/swagger/index.html":  true,
-		"/api/v1/courses":      false,
+		"/health":             true,
+		"/metrics":            true,
+		"/swagger/index.html": true,
+		"/api/v1/courses":     false,
 	}
 	for path, want := range cases {
 		if got := middleware.SkipPaths(path, skips); got != want {

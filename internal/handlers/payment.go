@@ -37,29 +37,29 @@ type createCouponRequest struct {
 }
 
 type OrderResponse struct {
-	ID             string     `json:"id"`
-	UserID         string     `json:"user_id"`
-	CourseID       string     `json:"course_id"`
-	Status         string     `json:"status"`
-	AmountCents    int        `json:"amount_cents"`
-	DiscountCents  int        `json:"discount_cents"`
-	TotalCents     int        `json:"total_cents"`
-	Currency       string     `json:"currency"`
-	CouponID       *string    `json:"coupon_id,omitempty"`
-	CouponCode     string     `json:"coupon_code,omitempty"`
-	Provider       string     `json:"provider"`
-	ProviderRef    string     `json:"provider_ref,omitempty"`
-	EnrollmentID   *string    `json:"enrollment_id,omitempty"`
-	PaidAt         *time.Time `json:"paid_at,omitempty"`
-	FailedAt       *time.Time `json:"failed_at,omitempty"`
-	RefundedAt     *time.Time `json:"refunded_at,omitempty"`
-	CancelledAt    *time.Time `json:"cancelled_at,omitempty"`
-	CreatedAt      time.Time  `json:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at"`
-	UserEmail      string     `json:"user_email,omitempty"`
-	UserFullName   string     `json:"user_full_name,omitempty"`
-	CourseTitle    string     `json:"course_title,omitempty"`
-	CourseSlug     string     `json:"course_slug,omitempty"`
+	ID            string     `json:"id"`
+	UserID        string     `json:"user_id"`
+	CourseID      string     `json:"course_id"`
+	Status        string     `json:"status"`
+	AmountCents   int        `json:"amount_cents"`
+	DiscountCents int        `json:"discount_cents"`
+	TotalCents    int        `json:"total_cents"`
+	Currency      string     `json:"currency"`
+	CouponID      *string    `json:"coupon_id,omitempty"`
+	CouponCode    string     `json:"coupon_code,omitempty"`
+	Provider      string     `json:"provider"`
+	ProviderRef   string     `json:"provider_ref,omitempty"`
+	EnrollmentID  *string    `json:"enrollment_id,omitempty"`
+	PaidAt        *time.Time `json:"paid_at,omitempty"`
+	FailedAt      *time.Time `json:"failed_at,omitempty"`
+	RefundedAt    *time.Time `json:"refunded_at,omitempty"`
+	CancelledAt   *time.Time `json:"cancelled_at,omitempty"`
+	CreatedAt     time.Time  `json:"created_at"`
+	UpdatedAt     time.Time  `json:"updated_at"`
+	UserEmail     string     `json:"user_email,omitempty"`
+	UserFullName  string     `json:"user_full_name,omitempty"`
+	CourseTitle   string     `json:"course_title,omitempty"`
+	CourseSlug    string     `json:"course_slug,omitempty"`
 }
 
 type CheckoutResponse struct {

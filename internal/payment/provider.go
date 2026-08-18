@@ -17,10 +17,10 @@ type CheckoutSession struct {
 
 // WebhookResult is a normalized provider callback.
 type WebhookResult struct {
-	EventID   string
-	EventType string
-	OrderID   string
-	Status    domain.OrderStatus
+	EventID     string
+	EventType   string
+	OrderID     string
+	Status      domain.OrderStatus
 	ProviderRef string
 }
 
