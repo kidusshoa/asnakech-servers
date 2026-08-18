@@ -41,6 +41,9 @@ func (s *EnrollmentService) Enroll(ctx context.Context, actorID, courseID, invit
 	if course.TeacherID == actorID {
 		return nil, apperr.Validation("teachers cannot enroll in their own course")
 	}
+	if course.PriceCents > 0 {
+		return nil, apperr.Validation("paid course requires checkout; use POST /courses/:id/checkout")
+	}
 
 	inviteCode = strings.TrimSpace(inviteCode)
 	var invite *domain.EnrollmentInviteCode
@@ -130,6 +133,81 @@ func (s *EnrollmentService) reactivate(ctx context.Context, course *domain.Cours
 		if err := s.invites.IncrementUses(ctx, invite.ID); err != nil {
 			return nil, err
 		}
+	}
+	if err := s.emit(ctx, existing, eventType); err != nil {
+		return nil, err
+	}
+	return s.enrollments.GetByID(ctx, existing.ID)
+}
+
+func (s *EnrollmentService) EnrollFromPayment(ctx context.Context, userID, courseID string) (*domain.Enrollment, error) {
+	course, err := s.courses.GetByID(ctx, courseID)
+	if err != nil {
+		return nil, err
+	}
+	if course.Status != domain.CourseStatusPublished {
+		return nil, apperr.Validation("only published courses accept enrollment")
+	}
+
+	if existing, err := s.enrollments.GetByCourseUser(ctx, courseID, userID); err == nil {
+		switch existing.Status {
+		case domain.EnrollmentStatusActive:
+			return existing, nil
+		case domain.EnrollmentStatusWaitlisted:
+			return existing, nil
+		case domain.EnrollmentStatusCancelled:
+			return s.reactivateFromPayment(ctx, course, existing)
+		}
+	} else if !apperr.IsNotFound(err) {
+		return nil, err
+	}
+
+	now := time.Now().UTC()
+	status, eventType, err := s.decideSeat(ctx, course)
+	if err != nil {
+		return nil, err
+	}
+
+	en := &domain.Enrollment{
+		CourseID: courseID,
+		UserID:   userID,
+		Status:   status,
+		Source:   domain.EnrollmentSourcePayment,
+	}
+	if status == domain.EnrollmentStatusActive {
+		en.EnrolledAt = &now
+	} else {
+		en.WaitlistedAt = &now
+	}
+
+	if err := s.enrollments.Create(ctx, en); err != nil {
+		return nil, err
+	}
+	if err := s.emit(ctx, en, eventType); err != nil {
+		return nil, err
+	}
+	return s.enrollments.GetByID(ctx, en.ID)
+}
+
+func (s *EnrollmentService) reactivateFromPayment(ctx context.Context, course *domain.Course, existing *domain.Enrollment) (*domain.Enrollment, error) {
+	status, eventType, err := s.decideSeat(ctx, course)
+	if err != nil {
+		return nil, err
+	}
+	now := time.Now().UTC()
+	existing.Status = status
+	existing.CancelledAt = nil
+	existing.Source = domain.EnrollmentSourcePayment
+	existing.InviteCodeID = nil
+	if status == domain.EnrollmentStatusActive {
+		existing.EnrolledAt = &now
+		existing.WaitlistedAt = nil
+	} else {
+		existing.WaitlistedAt = &now
+		existing.EnrolledAt = nil
+	}
+	if err := s.enrollments.UpdateStatus(ctx, existing); err != nil {
+		return nil, err
 	}
 	if err := s.emit(ctx, existing, eventType); err != nil {
 		return nil, err

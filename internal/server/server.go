@@ -15,6 +15,7 @@ import (
 	"github.com/asnakech/asnakech-servers/internal/live"
 	"github.com/asnakech/asnakech-servers/internal/middleware"
 	"github.com/asnakech/asnakech-servers/internal/notify"
+	"github.com/asnakech/asnakech-servers/internal/payment"
 	"github.com/asnakech/asnakech-servers/internal/platform/ready"
 	"github.com/asnakech/asnakech-servers/internal/rbac"
 	"github.com/asnakech/asnakech-servers/internal/repository/postgres"
@@ -270,6 +271,15 @@ func (s *Server) registerRoutes() {
 			)
 			certHandler := handlers.NewCertificateHandler(certService)
 
+			orderRepo := postgres.NewOrderRepository(s.deps.DB)
+			couponRepo := postgres.NewCouponRepository(s.deps.DB)
+			webhookRepo := postgres.NewPaymentWebhookRepository(s.deps.DB)
+			paymentProviders := payment.NewRegistry(s.cfg)
+			paymentService := service.NewPaymentService(
+				courseRepo, orderRepo, couponRepo, webhookRepo, enrollmentService, paymentProviders,
+			)
+			paymentHandler := handlers.NewPaymentHandler(paymentService)
+
 			v1.GET("/categories", courseHandler.ListCategories)
 			v1.POST("/categories",
 				middleware.BearerAuth(tokenManager),
@@ -311,6 +321,11 @@ func (s *Server) registerRoutes() {
 				middleware.BearerAuth(tokenManager),
 				middleware.RequirePermission(rbac.PermCoursesRead),
 				certHandler.ListMyCertificates,
+			)
+			v1.GET("/me/orders",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesRead),
+				paymentHandler.ListMyOrders,
 			)
 			v1.GET("/me/transcript",
 				middleware.BearerAuth(tokenManager),
@@ -359,10 +374,31 @@ func (s *Server) registerRoutes() {
 				coursesGroup.POST("/:id/threads", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.CreateThread)
 				coursesGroup.GET("/:id/threads", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), commsHandler.ListThreads)
 
+				coursesGroup.POST("/:id/checkout", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), paymentHandler.CreateCheckout)
+				coursesGroup.GET("/:id/orders", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), paymentHandler.ListCourseOrders)
+
 				coursesGroup.POST("/:id/certificate", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), certHandler.IssueCertificate)
 				coursesGroup.GET("/:id/certificates", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), certHandler.ListCourseCertificates)
 				coursesGroup.GET("/:id/transcript/:userId", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), certHandler.UserCourseTranscript)
 			}
+
+			ordersGroup := v1.Group("/orders")
+			ordersGroup.Use(middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead))
+			{
+				ordersGroup.GET("/:orderId", paymentHandler.GetOrder)
+				ordersGroup.POST("/:orderId/confirm", paymentHandler.ConfirmOrder)
+				ordersGroup.POST("/:orderId/refund", middleware.RequirePermission(rbac.PermCoursesWrite), paymentHandler.RefundOrder)
+			}
+
+			couponsGroup := v1.Group("/coupons")
+			couponsGroup.Use(middleware.BearerAuth(tokenManager))
+			{
+				couponsGroup.POST("", middleware.RequirePermission(rbac.PermCoursesManage), paymentHandler.CreateCoupon)
+				couponsGroup.GET("", middleware.RequirePermission(rbac.PermCoursesRead), paymentHandler.ListCoupons)
+				couponsGroup.POST("/:couponId/revoke", middleware.RequirePermission(rbac.PermCoursesManage), paymentHandler.RevokeCoupon)
+			}
+
+			v1.POST("/webhooks/payments/:provider", paymentHandler.PaymentWebhook)
 
 			certificatesGroup := v1.Group("/certificates")
 			certificatesGroup.Use(middleware.BearerAuth(tokenManager))

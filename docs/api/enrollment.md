@@ -46,4 +46,6 @@ Each status change appends to `enrollment_events` (`enrolled`, `waitlisted`, `ac
 | `GET` | `/api/v1/courses/:id/invite-codes` | teacher owner or admin |
 | `DELETE` | `/api/v1/courses/:id/invite-codes/:codeId` | revoke |
 
-Payments (Stage 18) are not required yet — `price_cents` remains catalog metadata.
+## Paid courses
+
+When `price_cents > 0`, direct enroll returns validation error — use [checkout](./payments.md) (`POST /courses/:id/checkout`). Successful payment creates enrollment with `source=payment`.

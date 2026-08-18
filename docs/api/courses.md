@@ -11,7 +11,7 @@ Courses are catalog entries authored by teachers. See [curriculum.md](./curricul
 
 ## Pricing metadata
 
-`price_cents` + `currency` (ISO-like 3-letter, default `ETB`). Payments are Stage 18 — these fields are catalog metadata only. `0` means free.
+`price_cents` + `currency` (ISO-like 3-letter, default `ETB`). `0` means free (enroll directly). Paid courses use [checkout](./payments.md).
 
 ## Endpoints
 

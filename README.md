@@ -184,6 +184,10 @@ Every response includes an `X-Request-ID` header (generated if the client did no
 | `MEDIA_PRESIGN_TTL` | `15m` | Presigned upload URL lifetime |
 | `LIVE_DEFAULT_PROVIDER` | `custom` | Default video provider (`jitsi`, `zoom`, `google_meet`) |
 | `LIVE_JITSI_BASE_URL` | `https://meet.jit.si` | Jitsi room base URL |
+| `PAYMENT_DEFAULT_PROVIDER` | `manual` | Checkout provider (`stripe`, `chapa`) |
+| `PAYMENT_WEBHOOK_SECRET` | _(empty)_ | Manual webhook HMAC secret |
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | | Stripe checkout + webhooks |
+| `CHAPA_SECRET_KEY` / `CHAPA_WEBHOOK_SECRET` | | Chapa checkout + webhooks |
 
 Copy `.env.example` → `.env` for local defaults matching Compose.
 

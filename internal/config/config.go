@@ -37,6 +37,13 @@ type Config struct {
 
 	LiveDefaultProvider string
 	LiveJitsiBaseURL    string
+
+	PaymentDefaultProvider string
+	PaymentWebhookSecret   string
+	StripeSecretKey        string
+	StripeWebhookSecret    string
+	ChapaSecretKey         string
+	ChapaWebhookSecret     string
 }
 
 // Load reads optional .env, then environment variables into Config.
@@ -70,6 +77,13 @@ func Load() (*Config, error) {
 
 		LiveDefaultProvider: getEnv("LIVE_DEFAULT_PROVIDER", "custom"),
 		LiveJitsiBaseURL:    getEnv("LIVE_JITSI_BASE_URL", "https://meet.jit.si"),
+
+		PaymentDefaultProvider: getEnv("PAYMENT_DEFAULT_PROVIDER", "manual"),
+		PaymentWebhookSecret:   getEnv("PAYMENT_WEBHOOK_SECRET", ""),
+		StripeSecretKey:        getEnv("STRIPE_SECRET_KEY", ""),
+		StripeWebhookSecret:    getEnv("STRIPE_WEBHOOK_SECRET", ""),
+		ChapaSecretKey:         getEnv("CHAPA_SECRET_KEY", ""),
+		ChapaWebhookSecret:     getEnv("CHAPA_WEBHOOK_SECRET", ""),
 	}
 
 	if err := cfg.validate(); err != nil {

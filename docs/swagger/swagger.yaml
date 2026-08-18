@@ -353,6 +353,27 @@ definitions:
       verification_code:
         type: string
     type: object
+  handlers.CheckoutEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CheckoutResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CheckoutResponse:
+    properties:
+      checkout_url:
+        type: string
+      order:
+        $ref: '#/definitions/handlers.OrderResponse'
+      provider_meta:
+        additionalProperties:
+          type: string
+        type: object
+      provider_ref:
+        type: string
+    type: object
   handlers.ContentBlockEnvelope:
     properties:
       data:
@@ -417,6 +438,55 @@ definitions:
       unread_count:
         type: integer
       updated_at:
+        type: string
+    type: object
+  handlers.CouponEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CouponResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CouponListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.CouponResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CouponResponse:
+    properties:
+      code:
+        type: string
+      course_id:
+        type: string
+      created_at:
+        type: string
+      created_by:
+        type: string
+      currency:
+        type: string
+      discount_type:
+        type: string
+      discount_value:
+        type: integer
+      id:
+        type: string
+      max_uses:
+        type: integer
+      revoked_at:
+        type: string
+      updated_at:
+        type: string
+      uses_count:
+        type: integer
+      valid_from:
+        type: string
+      valid_until:
         type: string
     type: object
   handlers.CourseAccessEnvelope:
@@ -1200,6 +1270,75 @@ definitions:
       subject:
         type: string
     type: object
+  handlers.OrderEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.OrderResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.OrderListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.OrderResponse'
+        type: array
+      meta:
+        $ref: '#/definitions/response.Meta'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.OrderResponse:
+    properties:
+      amount_cents:
+        type: integer
+      cancelled_at:
+        type: string
+      coupon_code:
+        type: string
+      coupon_id:
+        type: string
+      course_id:
+        type: string
+      course_slug:
+        type: string
+      course_title:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      discount_cents:
+        type: integer
+      enrollment_id:
+        type: string
+      failed_at:
+        type: string
+      id:
+        type: string
+      paid_at:
+        type: string
+      provider:
+        type: string
+      provider_ref:
+        type: string
+      refunded_at:
+        type: string
+      status:
+        type: string
+      total_cents:
+        type: integer
+      updated_at:
+        type: string
+      user_email:
+        type: string
+      user_full_name:
+        type: string
+      user_id:
+        type: string
+    type: object
   handlers.OrganizationEnvelope:
     properties:
       data:
@@ -1691,6 +1830,13 @@ definitions:
     required:
     - title
     type: object
+  handlers.checkoutRequest:
+    properties:
+      coupon_code:
+        type: string
+      provider:
+        type: string
+    type: object
   handlers.completeMediaRequest:
     properties:
       duration_seconds:
@@ -1747,6 +1893,29 @@ definitions:
         type: string
     required:
     - name
+    type: object
+  handlers.createCouponRequest:
+    properties:
+      code:
+        type: string
+      course_id:
+        type: string
+      currency:
+        type: string
+      discount_type:
+        type: string
+      discount_value:
+        type: integer
+      max_uses:
+        type: integer
+      valid_from:
+        type: string
+      valid_until:
+        type: string
+    required:
+    - code
+    - discount_type
+    - discount_value
     type: object
   handlers.createCourseRequest:
     properties:
@@ -3314,6 +3483,85 @@ paths:
       summary: Mark DM conversation read
       tags:
       - communication
+  /api/v1/coupons:
+    get:
+      parameters:
+      - description: Filter by course
+        in: query
+        name: course_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CouponListEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List coupons
+      tags:
+      - payments
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Coupon
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.createCouponRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CouponEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create coupon (admin)
+      tags:
+      - payments
+  /api/v1/coupons/{couponId}/revoke:
+    post:
+      parameters:
+      - description: Coupon ID
+        in: path
+        name: couponId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Revoke coupon (admin)
+      tags:
+      - payments
   /api/v1/courses:
     get:
       description: Public catalog defaults to published. Teachers/admins may see drafts
@@ -3632,6 +3880,51 @@ paths:
       summary: List certificates issued for a course
       tags:
       - certificates
+  /api/v1/courses/{id}/checkout:
+    post:
+      consumes:
+      - application/json
+      description: Creates a pending order for a paid course. Free courses enroll
+        directly.
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Replay-safe checkout key
+        in: header
+        name: Idempotency-Key
+        type: string
+      - description: Checkout options
+        in: body
+        name: body
+        schema:
+          $ref: '#/definitions/handlers.checkoutRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CheckoutEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Start course checkout
+      tags:
+      - payments
   /api/v1/courses/{id}/curriculum:
     get:
       parameters:
@@ -3903,6 +4196,46 @@ paths:
       summary: Reorder modules
       tags:
       - curriculum
+  /api/v1/courses/{id}/orders:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Order status filter
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderListEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List course orders (teacher)
+      tags:
+      - payments
   /api/v1/courses/{id}/progress:
     get:
       parameters:
@@ -4477,6 +4810,37 @@ paths:
       summary: Mark all notifications read
       tags:
       - communication
+  /api/v1/me/orders:
+    get:
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Per page
+        in: query
+        name: per_page
+        type: integer
+      - description: Order status filter
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderListEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: List my orders
+      tags:
+      - payments
   /api/v1/me/progress:
     get:
       produces:
@@ -4743,6 +5107,95 @@ paths:
       summary: Mark notification read
       tags:
       - communication
+  /api/v1/orders/{orderId}:
+    get:
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get order
+      tags:
+      - payments
+  /api/v1/orders/{orderId}/confirm:
+    post:
+      description: Marks a pending manual-provider order as paid and enrolls the buyer.
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Confirm manual payment (development)
+      tags:
+      - payments
+  /api/v1/orders/{orderId}/refund:
+    post:
+      parameters:
+      - description: Order ID
+        in: path
+        name: orderId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Refund a paid order
+      tags:
+      - payments
   /api/v1/organizations:
     get:
       produces:
@@ -5769,6 +6222,35 @@ paths:
       summary: Avatar upload intent
       tags:
       - users
+  /api/v1/webhooks/payments/{provider}:
+    post:
+      consumes:
+      - application/json
+      description: Idempotent callback from manual, Stripe, or Chapa. See docs/api/payments.md.
+      parameters:
+      - description: Provider (manual, stripe, chapa)
+        in: path
+        name: provider
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.OrderEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Payment provider webhook
+      tags:
+      - payments
   /health:
     get:
       description: Returns OK when the process is running. Not under /api/v1.

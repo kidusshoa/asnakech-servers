@@ -27,6 +27,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 | [live.md](./live.md) | Live sessions, attendance, calendar |
 | [communication.md](./communication.md) | Announcements, discussions, DMs, notifications |
 | [certificates.md](./certificates.md) | Completion certs, verify, transcripts |
+| [payments.md](./payments.md) | Checkout, orders, coupons, webhooks |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

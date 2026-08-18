@@ -18,6 +18,7 @@ const (
 	EnrollmentSourceSelf       EnrollmentSource = "self"
 	EnrollmentSourceInviteCode EnrollmentSource = "invite_code"
 	EnrollmentSourceTeacher    EnrollmentSource = "teacher"
+	EnrollmentSourcePayment    EnrollmentSource = "payment"
 )
 
 // EnrollmentEventType is appended for later notification workers.

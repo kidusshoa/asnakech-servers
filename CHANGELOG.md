@@ -32,6 +32,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Live: `live_sessions`, `session_attendance`, Jitsi/custom/Zoom/Meet adapters, calendar feed
 - Communication: announcements, threads/posts, DMs, `notification_outbox` (in-app + email queue)
 - Certificates: `certificates` table, PDF download, public verify, transcript/grade summary
+- Payments: orders, coupons, manual/Stripe/Chapa adapters, webhooks with idempotency, paid-course checkout
 
 ### Changed
 
