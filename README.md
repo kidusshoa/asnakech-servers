@@ -1,38 +1,41 @@
 # Asnakech School Servers
 
-Backend API for the Asnakech online education platform. Built with Go and Gin as a **modular monolith** (domain → service → repository → handler).
+Backend API for the **Asnakech** online education platform — schools, teachers, students, and parents on a single Go service.
 
-> Status: **21-stage roadmap complete** — foundation through production hardening (CI, metrics, runbooks).
+Built as a **modular monolith**: `handlers` → `service` → `repository` → Postgres, with a shared JSON envelope, JWT auth, and RBAC.
 
-See [docs/ops/RUNBOOK.md](docs/ops/RUNBOOK.md) for deploy, migrations, backups, and incident response.
+| | |
+|---|---|
+| **Stack** | Go 1.25 · Gin · pgx · golang-migrate · zerolog · S3/MinIO |
+| **API** | REST `/api/v1` · OpenAPI at `/swagger/index.html` |
+| **Status** | 21-stage roadmap **complete** (foundation → production hardening) |
+| **Migrations** | 17 SQL pairs under `migrations/` |
 
-## Getting Started
+---
+
+## Quick start
 
 ### Prerequisites
 
-- Go 1.25 or higher
+- Go **1.25+**
 - Git
-- Docker + Docker Compose (optional, for local Postgres / Redis / MinIO)
+- Docker + Docker Compose (recommended for Postgres, Redis, MinIO)
 
-### Installation
+### Install & run (API on host)
 
 ```bash
 git clone https://github.com/kidusshoa/asnakech-servers.git
 cd asnakech-servers
 cp .env.example .env
 make install
-make tools   # optional: installs Air for hot-reload
-```
-
-### Running (API on host)
-
-```bash
 make up-infra          # Postgres, Redis, MinIO
-make migrate-up        # apply SQL migrations (roles seed)
-make tools && make dev # Air hot-reload, or go run fallback
+make migrate-up        # apply all migrations
+make tools && make dev # Air hot-reload (or go run fallback)
 ```
 
-### Running (full stack in Docker)
+API: **http://localhost:8080** · MinIO console: **http://localhost:9011** (`minioadmin` / `minioadmin`)
+
+### Full stack in Docker
 
 ```bash
 cp .env.example .env
@@ -40,47 +43,118 @@ make up
 make logs
 ```
 
-Server listens on `http://localhost:8080` by default. MinIO console defaults to `http://localhost:9011` (minioadmin / minioadmin).
+**Port conflicts:** if Compose reports *port already allocated*, change `POSTGRES_HOST_PORT`, `REDIS_HOST_PORT`, or `MINIO_*_HOST_PORT` in `.env` and keep `DATABASE_URL`, `REDIS_URL`, and `S3_ENDPOINT` in sync.
 
-If Compose fails with **port is already allocated**, another stack is using that host port (e.g. Redis on `6379`). Change `REDIS_HOST_PORT` / `MINIO_*_HOST_PORT` / `POSTGRES_HOST_PORT` in `.env` and keep `REDIS_URL` / `S3_ENDPOINT` / `DATABASE_URL` in sync.
+### Smoke checks
 
-## Project Structure
+```bash
+curl -s localhost:8080/health | jq
+curl -s localhost:8080/ready  | jq
+curl -s localhost:8080/metrics | head
+open http://localhost:8080/swagger/index.html
+```
+
+---
+
+## Platform capabilities
+
+| Domain | Highlights |
+|--------|------------|
+| **Auth & profiles** | Register/login, JWT access + refresh, password reset & email verify stubs, `/users/me`, avatar uploads |
+| **RBAC & admin** | Role permissions, admin user CRUD, platform KPIs & reports |
+| **Organizations** | Schools, memberships, invites |
+| **Courses & catalog** | Categories/tags, draft → publish → archive, pricing, FTS list filters |
+| **Curriculum** | Modules → lessons → content blocks (`text` / `video` / `file` / `quiz_ref`), reorder |
+| **Enrollment** | Self-enroll, capacity & waitlist, invite codes, paid-course gate |
+| **Progress** | Lesson upserts, course completion %, student dashboard |
+| **Assessments** | Quizzes (MCQ, short answer), assignments + rubric, gradebook |
+| **Media** | Presigned S3/MinIO uploads, scan hook, CDN-friendly URLs |
+| **Live learning** | Sessions, attendance, Jitsi/custom/Zoom/Meet join links, calendar feed |
+| **Communication** | Announcements, discussion threads, DMs, in-app notifications |
+| **Certificates** | PDF completion certs, public verify, transcripts |
+| **Payments** | Checkout, orders, coupons, manual/Stripe/Chapa adapters, webhooks |
+| **Analytics** | Admin overview, enrollment/revenue/user reports, per-course teacher analytics |
+| **Discovery** | Unified search, recommendations, i18n (en/am), feature flags, parent–student links |
+| **Ops** | Liveness/readiness probes, Prometheus metrics, security headers, rate limits, GitHub Actions CI |
+
+Every JSON response uses the shared envelope (`success`, `data`, `error`, `meta`). See [docs/api/envelope.md](docs/api/envelope.md).
+
+```json
+{
+  "success": true,
+  "data": { },
+  "error": null,
+  "meta": { "request_id": "…" }
+}
+```
+
+All responses include **`X-Request-ID`** (generated when the client omits it). Production logs are structured JSON; development uses console formatting.
+
+### API reference
+
+| Resource | Where to look |
+|----------|---------------|
+| **Interactive docs** | [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) |
+| **OpenAPI files** | `docs/swagger/swagger.json` |
+| **Human guides** | [docs/api/README.md](docs/api/README.md) — auth, courses, curriculum, enrollment, progress, assessments, media, live, communication, certificates, payments, analytics, discovery |
+| **Versioning & deprecation** | [versioning.md](docs/api/versioning.md) · [deprecation.md](docs/api/deprecation.md) |
+| **API changelog** | [docs/api/CHANGELOG.md](docs/api/CHANGELOG.md) |
+
+**Ops endpoints (not under `/api/v1`):**
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `GET` | `/health` | Liveness + `APP_VERSION` |
+| `GET` | `/ready` | Readiness (Postgres; Redis/S3 when configured) |
+| `GET` | `/metrics` | Prometheus text scrape target |
+| `GET` | `/swagger/index.html` | Swagger UI |
+
+---
+
+## Project structure
 
 ```
 .
-├── cmd/api/                 # Process entrypoint
+├── cmd/api/                    # Process entrypoint
 ├── internal/
-│   ├── apperr/              # Typed application errors
-│   ├── config/              # Env + optional .env loading
-│   ├── database/            # Postgres pool helpers
-│   ├── domain/              # Business entities (growing)
-│   ├── handlers/            # HTTP handlers (thin)
-│   ├── logging/             # Zerolog setup
-│   ├── middleware/          # CORS, request ID, security, rate limits, metrics
+│   ├── apperr/                 # Typed application errors
+│   ├── auth/                   # JWT token manager
+│   ├── config/                 # Env + optional .env loading
+│   ├── database/               # Postgres pool
+│   ├── domain/                 # Business entities
+│   ├── handlers/               # HTTP handlers (thin)
+│   ├── i18n/                   # Locale messages (en, am)
+│   ├── live/                   # Video provider adapters
+│   ├── logging/                # Zerolog setup
+│   ├── middleware/             # CORS, auth, RBAC, security, rate limits, metrics
+│   ├── notify/                 # Notification outbox
+│   ├── payment/                # Payment provider adapters
 │   ├── platform/
-│   │   ├── metrics/         # Prometheus text registry
-│   │   └── ready/           # Dependency readiness checks
-│   ├── repository/          # Persistence interfaces
-│   │   └── postgres/        # Postgres implementations
-│   ├── response/            # Standard JSON envelope
-│   ├── server/              # HTTP server wiring & routes
-│   └── service/             # Use-cases / workflows
-├── migrations/              # golang-migrate SQL (up/down)
+│   │   ├── metrics/            # Prometheus registry
+│   │   └── ready/              # Dependency checks
+│   ├── rbac/                   # Permissions
+│   ├── repository/postgres/    # SQL implementations
+│   ├── response/               # JSON envelope helpers
+│   ├── server/                 # Route wiring
+│   ├── service/                # Use-cases
+│   └── storage/                # S3/MinIO client
+├── migrations/                 # golang-migrate SQL (000001–000017)
+├── scripts/
+│   ├── promote_teacher.go      # TUID=<uuid> go run ./scripts/promote_teacher.go
+│   └── promote_admin.go        # TUID=<uuid> go run ./scripts/promote_admin.go
 ├── docs/
-│   ├── api/                 # Envelope, versioning, API changelog
-│   ├── swagger/             # Generated OpenAPI (swag)
-│   ├── git/                 # Contributing, branching, commits, releases
-│   ├── ops/                 # Runbook (deploy, backups, incidents)
-│   └── db/                  # Schema conventions
-├── .github/workflows/       # CI (test, vet, docs-check, migrations)
-├── Dockerfile
+│   ├── api/                    # Guides + API changelog
+│   ├── swagger/                # Generated OpenAPI
+│   ├── git/                    # Contributing, branching, releases
+│   ├── ops/                    # Runbook
+│   └── db/                     # Schema conventions
+├── .github/workflows/ci.yml    # CI pipeline
+├── Dockerfile                  # Multi-stage, Go 1.25
 ├── docker-compose.yml
 ├── .air.toml
 ├── .env.example
 ├── CHANGELOG.md
-├── go.mod
-├── Makefile
-└── README.md
+└── Makefile
 ```
 
 ### Layering rules
@@ -92,137 +166,118 @@ If Compose fails with **port is already allocated**, another stack is using that
 | `repository` | `domain` | Gin / handlers |
 | `domain` | stdlib only | Gin, SQL, services |
 
-## Available Commands
+---
+
+## Makefile commands
 
 | Command | Description |
 |---------|-------------|
 | `make build` | Build binary to `bin/` |
 | `make run` | Build and run |
 | `make test` | Run all tests |
-| `make clean` | Remove build artifacts and `tmp/` |
-| `make install` | Download modules |
-| `make tools` | Install Air + swag CLI |
 | `make dev` | Hot-reload with Air, or `go run` |
+| `make ci` | fmt-check + vet + test + build + docs-check |
+| `make vet` | `go vet ./...` |
+| `make fmt-check` | Fail if sources need `gofmt` |
+| `make docs` | Regenerate OpenAPI into `docs/swagger/` |
+| `make docs-check` | Fail if swagger output is stale |
+| `make migrate-up` | Apply pending migrations |
+| `make migrate-down` | Roll back one migration |
+| `make migrate-version` | Show current migration version |
+| `make migrate-create NAME=…` | Scaffold a new migration pair |
 | `make up` | Docker Compose: API + infra |
 | `make up-infra` | Postgres + Redis + MinIO only |
 | `make down` | Stop Compose stack |
 | `make logs` | Follow API container logs |
-| `make migrate-up` | Apply all pending DB migrations |
-| `make migrate-down` | Roll back one migration |
-| `make migrate-version` | Show current migration version |
-| `make migrate-create NAME=…` | Scaffold a new migration pair |
-| `make docs` | Regenerate OpenAPI into `docs/swagger/` |
-| `make docs-check` | Fail if swagger output is stale |
-| `make vet` | Run `go vet` |
-| `make fmt-check` | Fail if sources need `gofmt` |
-| `make ci` | fmt-check + vet + test + build + docs-check |
+| `make tools` | Install Air + swag CLI |
+| `make install` | Download Go modules |
+| `make clean` | Remove build artifacts |
 
-## API Endpoints
+---
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Liveness / version |
-| `GET` | `/ready` | Readiness (Postgres, Redis, S3 when configured) |
-| `GET` | `/metrics` | Prometheus metrics (restrict in production) |
-| `GET` | `/swagger/index.html` | Interactive OpenAPI (Swagger UI) |
-| `GET` | `/api/v1/` | Welcome stub |
-| `GET` | `/api/v1/roles` | List seeded platform roles (requires DB) |
-| `POST` | `/api/v1/auth/register` | Create account (student) |
-| `POST` | `/api/v1/auth/login` | Login |
-| `POST` | `/api/v1/auth/refresh` | Rotate tokens |
-| `POST` | `/api/v1/auth/logout` | Revoke refresh token |
-| `GET` | `/api/v1/auth/me` | Current user (Bearer) |
-| `POST` | `/api/v1/auth/forgot-password` | Request password reset |
-| `POST` | `/api/v1/auth/reset-password` | Set new password |
-| `POST` | `/api/v1/auth/verify-email` | Confirm email |
-| `GET/PATCH` | `/api/v1/users/me` | Profile (Bearer) |
-| `PUT` | `/api/v1/users/me/avatar` | Set avatar URL |
-| `GET` | `/api/v1/admin/users` | List users (admin) |
-| `POST/GET` | `/api/v1/organizations` | Create / list my schools |
-| `POST` | `/api/v1/organizations/invites/accept` | Accept invite |
-| `GET` | `/api/v1/categories` | Course categories |
-| `GET/POST` | `/api/v1/courses` | Catalog list / create (teacher) |
-| `GET` | `/api/v1/courses/:id/curriculum` | Nested modules → lessons → blocks |
-| `POST/DELETE` | `/api/v1/courses/:id/enroll` | Enroll / unenroll |
-| `GET` | `/api/v1/me/enrollments` | My enrollments |
-| `PUT/GET` | `/api/v1/lessons/:id/progress` | Lesson progress |
-| `GET` | `/api/v1/me/progress` | Progress dashboard |
-| `POST/GET` | `/api/v1/courses/:id/quizzes` | Quizzes |
-| `GET` | `/api/v1/courses/:id/gradebook` | Teacher gradebook |
-| `POST` | `/api/v1/media/uploads` | Presigned upload intent |
-| `GET` | `/api/v1/me/calendar` | Live session calendar feed |
-| `GET` | `/api/v1/me/notifications` | In-app notification feed |
-| `GET` | `/api/v1/certificates/verify/:code` | Public certificate verify |
+## Environment variables
 
-Human-readable API guides: **[docs/api/](docs/api/README.md)** (incl. [courses](docs/api/courses.md), [curriculum](docs/api/curriculum.md), [enrollment](docs/api/enrollment.md), [progress](docs/api/progress.md), [assessments](docs/api/assessments.md), [media](docs/api/media.md), [live](docs/api/live.md), [communication](docs/api/communication.md), [certificates](docs/api/certificates.md)).
-
-Responses use a shared envelope:
-
-```json
-{
-  "success": true,
-  "data": { },
-  "error": null,
-  "meta": { }
-}
-```
-
-Every response includes an `X-Request-ID` header (generated if the client did not send one). Logs are structured JSON in production and console-formatted in development.
-
-## Environment Variables
+Copy `.env.example` → `.env`. Key settings:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `8080` | HTTP listen port |
 | `ENV` | `development` | `development` or `production` |
-| `APP_VERSION` | `0.1.0` | Reported in health/welcome |
+| `APP_VERSION` | `0.1.0` | Reported in `/health` and welcome |
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error` |
-| `CORS_ALLOWED_ORIGINS` | `*` | Comma-separated origins |
-| `CORS_ALLOW_CREDENTIALS` | `false` | Must stay false when origin is `*` |
-| `DATABASE_URL` | _(empty)_ | Postgres URL; required in production; enables `/roles` |
+| `DATABASE_URL` | _(empty)_ | Postgres URL — **required in production** |
 | `REDIS_URL` | _(empty)_ | Redis URL; skipped in `/ready` if empty |
-| `JWT_SECRET` | _(empty)_ | Required when `ENV=production` |
+| `JWT_SECRET` | _(empty)_ | **Required when `ENV=production`** |
 | `JWT_ACCESS_TTL` | `15m` | Access token lifetime |
 | `JWT_REFRESH_TTL` | `168h` | Refresh token lifetime |
-| `S3_ENDPOINT` | _(empty)_ | MinIO/S3 endpoint; TCP-checked in `/ready` |
-| `S3_REGION` | `us-east-1` | Bucket region |
-| `S3_BUCKET` | `asnakech` | Default bucket |
-| `S3_ACCESS_KEY` / `S3_SECRET_KEY` | | Object storage credentials |
-| `S3_USE_PATH_STYLE` | `true` | Path-style URLs (MinIO) |
-| `S3_PUBLIC_BASE_URL` | _(empty)_ | Optional CDN base for `public_url` |
-| `MEDIA_PRESIGN_TTL` | `15m` | Presigned upload URL lifetime |
-| `LIVE_DEFAULT_PROVIDER` | `custom` | Default video provider (`jitsi`, `zoom`, `google_meet`) |
-| `LIVE_JITSI_BASE_URL` | `https://meet.jit.si` | Jitsi room base URL |
-| `PAYMENT_DEFAULT_PROVIDER` | `manual` | Checkout provider (`stripe`, `chapa`) |
-| `PAYMENT_WEBHOOK_SECRET` | _(empty)_ | Manual webhook HMAC secret |
-| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | | Stripe checkout + webhooks |
-| `CHAPA_SECRET_KEY` / `CHAPA_WEBHOOK_SECRET` | | Chapa checkout + webhooks |
-| `RATE_LIMIT_GLOBAL_RPS` | `100` | Global API rate limit (0 = off); skips `/health`, `/ready`, `/metrics`, `/swagger` |
-| `RATE_LIMIT_GLOBAL_BURST` | `300` | Global burst |
-| `RATE_LIMIT_AUTH_RPS` | `2` | Auth endpoint rate limit |
-| `RATE_LIMIT_AUTH_BURST` | `10` | Auth burst |
+| `CORS_ALLOWED_ORIGINS` | `*` | Comma-separated origins |
+| `CORS_ALLOW_CREDENTIALS` | `false` | Must stay `false` when origin is `*` |
+| `S3_*` | see `.env.example` | MinIO/S3 for media uploads |
+| `LIVE_DEFAULT_PROVIDER` | `custom` | `jitsi`, `zoom`, `google_meet`, … |
+| `PAYMENT_DEFAULT_PROVIDER` | `manual` | `stripe`, `chapa` |
+| `FEATURE_FLAGS` | _(empty)_ | Comma-separated toggles; prefix `!` to disable |
+| `RATE_LIMIT_GLOBAL_RPS` | `100` | Global limit (`0` = off); skips ops paths |
+| `RATE_LIMIT_AUTH_RPS` | `2` | Auth endpoint limit |
 | `METRICS_ENABLED` | `true` | Expose `GET /metrics` |
-| `SECURITY_HSTS` | `false` | Send `Strict-Transport-Security` (enable with HTTPS) |
-| `TRUSTED_PROXIES` | _(empty)_ | CIDRs for `X-Forwarded-For` behind load balancers |
+| `SECURITY_HSTS` | `false` | HSTS header (enable with HTTPS) |
+| `TRUSTED_PROXIES` | _(empty)_ | LB CIDRs for correct client IP |
 
-Copy `.env.example` → `.env` for local defaults matching Compose.
+Full list with payment and compose port vars: **[.env.example](.env.example)**.
 
-## Roadmap
+---
 
-All **21 stages** are implemented (architecture → production hardening). See [CHANGELOG.md](CHANGELOG.md) for feature history.
+## Production & CI
+
+**CI** (`.github/workflows/ci.yml`) on every push/PR: `gofmt`, `go vet`, `go test -race`, build, OpenAPI freshness, migration up/down smoke on Postgres 16.
+
+**Deploy & day-2 ops:** [docs/ops/RUNBOOK.md](docs/ops/RUNBOOK.md) — probes, migrations, backups, secrets rotation, incident steps.
+
+**Releases:** [docs/git/RELEASE.md](docs/git/RELEASE.md) — SemVer, changelog, tagging.
+
+Local CI gate before opening a PR:
+
+```bash
+make ci
+```
+
+---
+
+## Development notes
+
+**Promote roles locally** (re-login after so JWT carries the new role):
+
+```bash
+TUID=<user-uuid> go run ./scripts/promote_teacher.go
+TUID=<user-uuid> go run ./scripts/promote_admin.go
+```
+
+**Regenerate OpenAPI** after changing handler swag comments:
+
+```bash
+make docs
+```
+
+**New migration:**
+
+```bash
+make migrate-create NAME=add_foo
+make migrate-up
+```
+
+---
 
 ## Contributing
 
-See **[docs/git/](docs/git/README.md)** for the full workflow:
+See **[docs/git/](docs/git/README.md)**:
 
 - [Contributing](docs/git/CONTRIBUTING.md)
 - [Branching](docs/git/BRANCHING.md)
 - [Commit convention](docs/git/COMMIT_CONVENTION.md)
 - [Releases](docs/git/RELEASE.md)
 
-Short version: branch from `master` → Conventional Commits → PR (squash-merge).
+Branch from `master` → Conventional Commits → PR (squash-merge). Project history: [CHANGELOG.md](CHANGELOG.md).
 
-Notable changes are listed in [CHANGELOG.md](CHANGELOG.md).
+---
 
 ## License
 
