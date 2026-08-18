@@ -60,3 +60,5 @@ Then log in again so the JWT picks up the new role.
 | `GET` | `/api/v1/admin/users/:id` | `users:manage` |
 | `PATCH` | `/api/v1/admin/users/:id` | `users:manage` |
 | `DELETE` | `/api/v1/admin/users/:id` | `users:manage` |
+
+Analytics and reports (`users:manage`): see [analytics.md](./analytics.md).

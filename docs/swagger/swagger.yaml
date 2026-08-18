@@ -510,6 +510,47 @@ definitions:
       is_teacher:
         type: boolean
     type: object
+  handlers.CourseAnalyticsEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.CourseAnalyticsResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.CourseAnalyticsResponse:
+    properties:
+      assignments_published:
+        type: integer
+      average_progress_percent:
+        type: integer
+      certificates_issued:
+        type: integer
+      completion_count:
+        type: integer
+      completion_rate_percent:
+        type: integer
+      course_id:
+        type: string
+      course_title:
+        type: string
+      currency:
+        type: string
+      enrollments_active:
+        type: integer
+      enrollments_cancelled:
+        type: integer
+      enrollments_waitlisted:
+        type: integer
+      generated_at:
+        type: string
+      orders_paid:
+        type: integer
+      quizzes_published:
+        type: integer
+      revenue_cents:
+        type: integer
+    type: object
   handlers.CourseEnvelope:
     properties:
       data:
@@ -737,6 +778,29 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.EnrollmentReportEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.EnrollmentReportRowResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.EnrollmentReportRowResponse:
+    properties:
+      count:
+        type: integer
+      course_id:
+        type: string
+      course_title:
+        type: string
+      period:
+        type: string
+      status:
+        type: string
     type: object
   handlers.EnrollmentResponse:
     properties:
@@ -1374,6 +1438,33 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.PlatformOverviewEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.PlatformOverviewResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.PlatformOverviewResponse:
+    properties:
+      certificates_total:
+        type: integer
+      courses:
+        $ref: '#/definitions/handlers.coursesOverview'
+      enrollments:
+        $ref: '#/definitions/handlers.enrollOverview'
+      generated_at:
+        type: string
+      organizations_total:
+        type: integer
+      revenue:
+        $ref: '#/definitions/handlers.revenueOverview'
+      trends:
+        $ref: '#/definitions/handlers.trendsOverview'
+      users:
+        $ref: '#/definitions/handlers.usersOverview'
+    type: object
   handlers.PostEnvelope:
     properties:
       data:
@@ -1522,6 +1613,31 @@ definitions:
       success:
         example: true
         type: boolean
+    type: object
+  handlers.RevenueReportEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.RevenueReportRowResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.RevenueReportRowResponse:
+    properties:
+      course_id:
+        type: string
+      course_title:
+        type: string
+      currency:
+        type: string
+      order_count:
+        type: integer
+      period:
+        type: string
+      revenue_cents:
+        type: integer
     type: object
   handlers.RoleResponse:
     properties:
@@ -1726,6 +1842,25 @@ definitions:
         example: true
         type: boolean
     type: object
+  handlers.UserGrowthPointResponse:
+    properties:
+      count:
+        type: integer
+      period:
+        type: string
+      role:
+        type: string
+    type: object
+  handlers.UserGrowthReportEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.UserGrowthPointResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
   handlers.UserListResponse:
     properties:
       data:
@@ -1846,6 +1981,15 @@ definitions:
       size_bytes:
         type: integer
       width:
+        type: integer
+    type: object
+  handlers.coursesOverview:
+    properties:
+      by_status:
+        additionalProperties:
+          type: integer
+        type: object
+      total:
         type: integer
     type: object
   handlers.createAssignmentRequest:
@@ -2073,6 +2217,15 @@ definitions:
     required:
     - user_id
     type: object
+  handlers.enrollOverview:
+    properties:
+      by_status:
+        additionalProperties:
+          type: integer
+        type: object
+      total:
+        type: integer
+    type: object
   handlers.enrollRequest:
     properties:
       invite_code:
@@ -2206,6 +2359,15 @@ definitions:
     - new_password
     - token
     type: object
+  handlers.revenueOverview:
+    properties:
+      currency:
+        type: string
+      orders_paid:
+        type: integer
+      total_cents:
+        type: integer
+    type: object
   handlers.rubricCriterionRequest:
     properties:
       criterion:
@@ -2310,6 +2472,15 @@ definitions:
         type: string
       quiz_title:
         type: string
+    type: object
+  handlers.trendsOverview:
+    properties:
+      enrollments_last_7_days:
+        type: integer
+      new_users_last_7_days:
+        type: integer
+      revenue_last_7_days_cents:
+        type: integer
     type: object
   handlers.updateAssignmentRequest:
     properties:
@@ -2484,6 +2655,15 @@ definitions:
       submit:
         type: boolean
     type: object
+  handlers.usersOverview:
+    properties:
+      by_role:
+        additionalProperties:
+          type: integer
+        type: object
+      total:
+        type: integer
+    type: object
   handlers.verifyEmailRequest:
     properties:
       token:
@@ -2550,6 +2730,110 @@ paths:
       summary: API welcome
       tags:
       - system
+  /api/v1/admin/overview:
+    get:
+      description: 'KPI snapshot: users, courses, enrollments, revenue, 7-day trends'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PlatformOverviewEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Platform overview (admin)
+      tags:
+      - admin
+  /api/v1/admin/reports/enrollments:
+    get:
+      parameters:
+      - description: Start date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: from
+        type: string
+      - description: End date (YYYY-MM-DD or RFC3339)
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.EnrollmentReportEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Enrollment report (admin)
+      tags:
+      - admin
+  /api/v1/admin/reports/revenue:
+    get:
+      parameters:
+      - description: Start date
+        in: query
+        name: from
+        type: string
+      - description: End date
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.RevenueReportEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Revenue report (admin)
+      tags:
+      - admin
+  /api/v1/admin/reports/users:
+    get:
+      parameters:
+      - description: Start date
+        in: query
+        name: from
+        type: string
+      - description: End date
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UserGrowthReportEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: User growth report (admin)
+      tags:
+      - admin
   /api/v1/admin/users:
     get:
       description: Paginated user directory for administrators
@@ -3719,6 +4003,34 @@ paths:
       summary: Check course content access
       tags:
       - enrollments
+  /api/v1/courses/{id}/analytics:
+    get:
+      parameters:
+      - description: Course ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.CourseAnalyticsEnvelope'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Course analytics (teacher)
+      tags:
+      - analytics
   /api/v1/courses/{id}/announcements:
     get:
       parameters:

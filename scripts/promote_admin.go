@@ -1,7 +1,7 @@
 //go:build ignore
 
-// One-off dev helper: promote a user to teacher by UUID.
-// Usage: TUID=<uuid> go run ./scripts/promote_teacher.go
+// One-off dev helper: promote a user to admin by UUID.
+// Usage: TUID=<uuid> go run ./scripts/promote_admin.go
 package main
 
 import (
@@ -28,7 +28,7 @@ func main() {
 	}
 	defer pool.Close()
 	var roleID string
-	if err := pool.QueryRow(context.Background(), "SELECT id::text FROM roles WHERE code='teacher'").Scan(&roleID); err != nil {
+	if err := pool.QueryRow(context.Background(), "SELECT id::text FROM roles WHERE code='admin'").Scan(&roleID); err != nil {
 		panic(err)
 	}
 	if _, err := pool.Exec(context.Background(), "UPDATE users SET role_id=$1 WHERE id=$2", roleID, uid); err != nil {

@@ -139,6 +139,10 @@ func (s *Server) registerRoutes() {
 			userService := service.NewUserService(userRepo, roleRepo)
 			userHandler := handlers.NewUserHandler(userService, mediaService)
 
+			analyticsRepo := postgres.NewAnalyticsRepository(s.deps.DB)
+			analyticsService := service.NewAnalyticsService(courseRepoEarly, analyticsRepo)
+			analyticsHandler := handlers.NewAnalyticsHandler(analyticsService)
+
 			authLimiter := middleware.NewIPRateLimiter(2, 10)
 			authGroup := v1.Group("/auth")
 			authGroup.Use(authLimiter.Limit())
@@ -180,6 +184,10 @@ func (s *Server) registerRoutes() {
 				adminGroup.GET("/users/:id", userHandler.AdminGetUser)
 				adminGroup.PATCH("/users/:id", userHandler.AdminUpdateUser)
 				adminGroup.DELETE("/users/:id", userHandler.AdminDeleteUser)
+				adminGroup.GET("/overview", analyticsHandler.AdminOverview)
+				adminGroup.GET("/reports/enrollments", analyticsHandler.EnrollmentReport)
+				adminGroup.GET("/reports/revenue", analyticsHandler.RevenueReport)
+				adminGroup.GET("/reports/users", analyticsHandler.UserGrowthReport)
 			}
 
 			orgRepo := postgres.NewOrganizationRepository(s.deps.DB)
@@ -376,6 +384,7 @@ func (s *Server) registerRoutes() {
 
 				coursesGroup.POST("/:id/checkout", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), paymentHandler.CreateCheckout)
 				coursesGroup.GET("/:id/orders", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), paymentHandler.ListCourseOrders)
+				coursesGroup.GET("/:id/analytics", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), analyticsHandler.CourseAnalytics)
 
 				coursesGroup.POST("/:id/certificate", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesRead), certHandler.IssueCertificate)
 				coursesGroup.GET("/:id/certificates", middleware.BearerAuth(tokenManager), middleware.RequirePermission(rbac.PermCoursesWrite), certHandler.ListCourseCertificates)

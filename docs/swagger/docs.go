@@ -44,6 +44,175 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/admin/overview": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "KPI snapshot: users, courses, enrollments, revenue, 7-day trends",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Platform overview (admin)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.PlatformOverviewEnvelope"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/reports/enrollments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Enrollment report (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date (YYYY-MM-DD or RFC3339)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date (YYYY-MM-DD or RFC3339)",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.EnrollmentReportEnvelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/reports/revenue": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Revenue report (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.RevenueReportEnvelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/reports/users": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "User growth report (admin)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Start date",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "End date",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UserGrowthReportEnvelope"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/admin/users": {
             "get": {
                 "security": [
@@ -1898,6 +2067,51 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/handlers.CourseAccessEnvelope"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/analytics": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "analytics"
+                ],
+                "summary": "Course analytics (teacher)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Course ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.CourseAnalyticsEnvelope"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.ErrorResponse"
                         }
                     }
                 }
@@ -6811,6 +7025,68 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.CourseAnalyticsEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.CourseAnalyticsResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.CourseAnalyticsResponse": {
+            "type": "object",
+            "properties": {
+                "assignments_published": {
+                    "type": "integer"
+                },
+                "average_progress_percent": {
+                    "type": "integer"
+                },
+                "certificates_issued": {
+                    "type": "integer"
+                },
+                "completion_count": {
+                    "type": "integer"
+                },
+                "completion_rate_percent": {
+                    "type": "integer"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "enrollments_active": {
+                    "type": "integer"
+                },
+                "enrollments_cancelled": {
+                    "type": "integer"
+                },
+                "enrollments_waitlisted": {
+                    "type": "integer"
+                },
+                "generated_at": {
+                    "type": "string"
+                },
+                "orders_paid": {
+                    "type": "integer"
+                },
+                "quizzes_published": {
+                    "type": "integer"
+                },
+                "revenue_cents": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.CourseEnvelope": {
             "type": "object",
             "properties": {
@@ -7153,6 +7429,41 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "handlers.EnrollmentReportEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.EnrollmentReportRowResponse"
+                    }
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.EnrollmentReportRowResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "course_id": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
                 }
             }
         },
@@ -8118,6 +8429,47 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.PlatformOverviewEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "$ref": "#/definitions/handlers.PlatformOverviewResponse"
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.PlatformOverviewResponse": {
+            "type": "object",
+            "properties": {
+                "certificates_total": {
+                    "type": "integer"
+                },
+                "courses": {
+                    "$ref": "#/definitions/handlers.coursesOverview"
+                },
+                "enrollments": {
+                    "$ref": "#/definitions/handlers.enrollOverview"
+                },
+                "generated_at": {
+                    "type": "string"
+                },
+                "organizations_total": {
+                    "type": "integer"
+                },
+                "revenue": {
+                    "$ref": "#/definitions/handlers.revenueOverview"
+                },
+                "trends": {
+                    "$ref": "#/definitions/handlers.trendsOverview"
+                },
+                "users": {
+                    "$ref": "#/definitions/handlers.usersOverview"
+                }
+            }
+        },
         "handlers.PostEnvelope": {
             "type": "object",
             "properties": {
@@ -8340,6 +8692,44 @@ const docTemplate = `{
                 "success": {
                     "type": "boolean",
                     "example": true
+                }
+            }
+        },
+        "handlers.RevenueReportEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.RevenueReportRowResponse"
+                    }
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
+        "handlers.RevenueReportRowResponse": {
+            "type": "object",
+            "properties": {
+                "course_id": {
+                    "type": "string"
+                },
+                "course_title": {
+                    "type": "string"
+                },
+                "currency": {
+                    "type": "string"
+                },
+                "order_count": {
+                    "type": "integer"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "revenue_cents": {
+                    "type": "integer"
                 }
             }
         },
@@ -8649,6 +9039,35 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.UserGrowthPointResponse": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "period": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UserGrowthReportEnvelope": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handlers.UserGrowthPointResponse"
+                    }
+                },
+                "success": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "handlers.UserListResponse": {
             "type": "object",
             "properties": {
@@ -8830,6 +9249,20 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "width": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.coursesOverview": {
+            "type": "object",
+            "properties": {
+                "by_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "total": {
                     "type": "integer"
                 }
             }
@@ -9171,6 +9604,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.enrollOverview": {
+            "type": "object",
+            "properties": {
+                "by_status": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.enrollRequest": {
             "type": "object",
             "properties": {
@@ -9373,6 +9820,20 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.revenueOverview": {
+            "type": "object",
+            "properties": {
+                "currency": {
+                    "type": "string"
+                },
+                "orders_paid": {
+                    "type": "integer"
+                },
+                "total_cents": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.rubricCriterionRequest": {
             "type": "object",
             "properties": {
@@ -9531,6 +9992,20 @@ const docTemplate = `{
                 },
                 "quiz_title": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.trendsOverview": {
+            "type": "object",
+            "properties": {
+                "enrollments_last_7_days": {
+                    "type": "integer"
+                },
+                "new_users_last_7_days": {
+                    "type": "integer"
+                },
+                "revenue_last_7_days_cents": {
+                    "type": "integer"
                 }
             }
         },
@@ -9796,6 +10271,20 @@ const docTemplate = `{
                 },
                 "submit": {
                     "type": "boolean"
+                }
+            }
+        },
+        "handlers.usersOverview": {
+            "type": "object",
+            "properties": {
+                "by_role": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
+                },
+                "total": {
+                    "type": "integer"
                 }
             }
         },

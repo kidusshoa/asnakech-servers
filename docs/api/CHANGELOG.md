@@ -22,3 +22,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Communication: announcements, discussion threads, DMs, notification outbox
 - Certificates: PDF completion certs, verification codes, transcript export
 - Payments: checkout, orders, coupons, provider webhooks, paid-course enrollment gate
+- Analytics: admin overview/reports, course-level teacher analytics
