@@ -52,6 +52,7 @@ func New(cfg *config.Config, logger zerolog.Logger, deps Dependencies) *Server {
 	router := gin.New()
 	router.Use(gin.Recovery())
 	router.Use(middleware.RequestID())
+	router.Use(middleware.Locale())
 	router.Use(middleware.ZerologRequest(logger))
 	router.Use(middleware.CORS(middleware.CORSConfig{
 		AllowedOrigins:   cfg.CORSOrigins,
@@ -142,6 +143,12 @@ func (s *Server) registerRoutes() {
 			analyticsRepo := postgres.NewAnalyticsRepository(s.deps.DB)
 			analyticsService := service.NewAnalyticsService(courseRepoEarly, analyticsRepo)
 			analyticsHandler := handlers.NewAnalyticsHandler(analyticsService)
+
+			searchRepo := postgres.NewSearchRepository(s.deps.DB)
+			parentLinkRepo := postgres.NewParentLinkRepository(s.deps.DB)
+			discoveryService := service.NewDiscoveryService(searchRepo, s.cfg)
+			parentService := service.NewParentService(userRepo, parentLinkRepo)
+			discoveryHandler := handlers.NewDiscoveryHandler(discoveryService, parentService)
 
 			authLimiter := middleware.NewIPRateLimiter(2, 10)
 			authGroup := v1.Group("/auth")
@@ -335,12 +342,37 @@ func (s *Server) registerRoutes() {
 				middleware.RequirePermission(rbac.PermCoursesRead),
 				paymentHandler.ListMyOrders,
 			)
+			v1.GET("/me/recommendations",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermCoursesRead),
+				discoveryHandler.Recommendations,
+			)
+			v1.GET("/me/children",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermProfileRead),
+				discoveryHandler.ListChildren,
+			)
+			v1.POST("/me/children/link",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermProfileRead),
+				discoveryHandler.LinkChild,
+			)
+			v1.DELETE("/me/children/:studentId",
+				middleware.BearerAuth(tokenManager),
+				middleware.RequirePermission(rbac.PermProfileRead),
+				discoveryHandler.UnlinkChild,
+			)
 			v1.GET("/me/transcript",
 				middleware.BearerAuth(tokenManager),
 				middleware.RequirePermission(rbac.PermCoursesRead),
 				certHandler.MyTranscript,
 			)
 			v1.GET("/certificates/verify/:code", certHandler.VerifyCertificate)
+
+			v1.GET("/search", discoveryHandler.Search)
+			v1.GET("/features", discoveryHandler.FeatureFlags)
+			v1.GET("/locales", discoveryHandler.Locales)
+			v1.GET("/i18n/messages", discoveryHandler.Messages)
 
 			coursesGroup := v1.Group("/courses")
 			{

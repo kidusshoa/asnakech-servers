@@ -225,8 +225,8 @@ func (r *CourseRepository) List(ctx context.Context, filter domain.CourseListFil
 		n++
 	}
 	if q := strings.TrimSpace(filter.Query); q != "" {
-		where = append(where, fmt.Sprintf("(c.title ILIKE $%d OR c.summary ILIKE $%d)", n, n))
-		args = append(args, "%"+q+"%")
+		where = append(where, fmt.Sprintf("c.search_vector @@ plainto_tsquery('simple', $%d)", n))
+		args = append(args, q)
 		n++
 	}
 	if filter.CategorySlug != "" {

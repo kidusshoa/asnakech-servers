@@ -44,6 +44,8 @@ type Config struct {
 	StripeWebhookSecret    string
 	ChapaSecretKey         string
 	ChapaWebhookSecret     string
+
+	FeatureFlags []string
 }
 
 // Load reads optional .env, then environment variables into Config.
@@ -84,6 +86,8 @@ func Load() (*Config, error) {
 		StripeWebhookSecret:    getEnv("STRIPE_WEBHOOK_SECRET", ""),
 		ChapaSecretKey:         getEnv("CHAPA_SECRET_KEY", ""),
 		ChapaWebhookSecret:     getEnv("CHAPA_WEBHOOK_SECRET", ""),
+
+		FeatureFlags: splitFeatureFlags(getEnv("FEATURE_FLAGS", "")),
 	}
 
 	if err := cfg.validate(); err != nil {
@@ -143,6 +147,22 @@ func getEnvAsDuration(key string, defaultValue time.Duration) time.Duration {
 		}
 	}
 	return defaultValue
+}
+
+func splitFeatureFlags(value string) []string {
+	value = strings.TrimSpace(value)
+	if value == "" {
+		return nil
+	}
+	parts := strings.Split(value, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 func splitCSV(value string) []string {

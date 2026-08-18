@@ -30,7 +30,7 @@ Courses are catalog entries authored by teachers. See [curriculum.md](./curricul
 
 ### List filters
 
-`page`, `per_page`, `q`, `category` (slug), `tag` (slug), `organization_id`, `teacher_id`, `level`, `status`
+`page`, `per_page`, `q` (full-text), `category` (slug), `tag` (slug), `organization_id`, `teacher_id`, `level`, `status`
 
 ## Seeded categories
 

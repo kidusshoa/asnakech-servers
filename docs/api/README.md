@@ -29,6 +29,7 @@ Generated specs live in [`docs/swagger/`](../swagger/) (`swagger.json`, `swagger
 | [certificates.md](./certificates.md) | Completion certs, verify, transcripts |
 | [payments.md](./payments.md) | Checkout, orders, coupons, webhooks |
 | [analytics.md](./analytics.md) | Admin KPIs, reports, course analytics |
+| [discovery.md](./discovery.md) | Search, i18n, recommendations, feature flags |
 | [CHANGELOG.md](./CHANGELOG.md) | API-facing changes |
 
 ## Regenerating OpenAPI

@@ -845,6 +845,16 @@ definitions:
         example: false
         type: boolean
     type: object
+  handlers.FeatureFlagsEnvelope:
+    properties:
+      data:
+        additionalProperties:
+          type: boolean
+        type: object
+      success:
+        example: true
+        type: boolean
+    type: object
   handlers.GradebookAssignmentScoreResponse:
     properties:
       assignment_id:
@@ -1149,6 +1159,27 @@ definitions:
       updated_at:
         type: string
     type: object
+  handlers.LocaleInfoResponse:
+    properties:
+      code:
+        type: string
+      name:
+        type: string
+      native_name:
+        type: string
+      rtl:
+        type: boolean
+    type: object
+  handlers.LocalesEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.LocaleInfoResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
   handlers.MeResponse:
     properties:
       data:
@@ -1272,6 +1303,16 @@ definitions:
     properties:
       data:
         $ref: '#/definitions/handlers.MessageData'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.MessagesEnvelope:
+    properties:
+      data:
+        additionalProperties:
+          type: string
+        type: object
       success:
         example: true
         type: boolean
@@ -1436,6 +1477,37 @@ definitions:
       slug:
         type: string
       updated_at:
+        type: string
+    type: object
+  handlers.ParentLinkEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.ParentLinkResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ParentLinkListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.ParentLinkResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.ParentLinkResponse:
+    properties:
+      id:
+        type: string
+      status:
+        type: string
+      student_email:
+        type: string
+      student_full_name:
+        type: string
+      student_id:
         type: string
     type: object
   handlers.PlatformOverviewEnvelope:
@@ -1614,6 +1686,71 @@ definitions:
         example: true
         type: boolean
     type: object
+  handlers.RecommendationListEnvelope:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/handlers.RecommendationResponse'
+        type: array
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.RecommendationResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      cover_url:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      enrollment_capacity:
+        type: integer
+      enrollment_open:
+        type: boolean
+      id:
+        type: string
+      language:
+        type: string
+      level:
+        type: string
+      organization_id:
+        type: string
+      price_cents:
+        type: integer
+      published_at:
+        type: string
+      reason:
+        type: string
+      score:
+        type: integer
+      slug:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      teacher_id:
+        type: string
+      teacher_name:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      waitlist_enabled:
+        type: boolean
+    type: object
   handlers.RevenueReportEnvelope:
     properties:
       data:
@@ -1672,6 +1809,93 @@ definitions:
         type: string
       max_points:
         type: integer
+    type: object
+  handlers.SearchCourseHitResponse:
+    properties:
+      category_id:
+        type: string
+      category_name:
+        type: string
+      cover_url:
+        type: string
+      created_at:
+        type: string
+      currency:
+        type: string
+      description:
+        type: string
+      enrollment_capacity:
+        type: integer
+      enrollment_open:
+        type: boolean
+      id:
+        type: string
+      language:
+        type: string
+      level:
+        type: string
+      organization_id:
+        type: string
+      price_cents:
+        type: integer
+      published_at:
+        type: string
+      rank:
+        type: number
+      slug:
+        type: string
+      status:
+        type: string
+      summary:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      teacher_id:
+        type: string
+      teacher_name:
+        type: string
+      title:
+        type: string
+      updated_at:
+        type: string
+      waitlist_enabled:
+        type: boolean
+    type: object
+  handlers.SearchEnvelope:
+    properties:
+      data:
+        $ref: '#/definitions/handlers.SearchResultsResponse'
+      success:
+        example: true
+        type: boolean
+    type: object
+  handlers.SearchResultsResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/handlers.CategoryResponse'
+        type: array
+      courses:
+        items:
+          $ref: '#/definitions/handlers.SearchCourseHitResponse'
+        type: array
+      query:
+        type: string
+      teachers:
+        items:
+          $ref: '#/definitions/handlers.SearchTeacherResponse'
+        type: array
+    type: object
+  handlers.SearchTeacherResponse:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: string
     type: object
   handlers.SubmissionEnvelope:
     properties:
@@ -2262,6 +2486,13 @@ definitions:
     properties:
       user_id:
         type: string
+    type: object
+  handlers.linkChildRequest:
+    properties:
+      student_email:
+        type: string
+    required:
+    - student_email
     type: object
   handlers.loginRequest:
     properties:
@@ -4782,6 +5013,35 @@ paths:
       summary: Export learner transcript for a course
       tags:
       - certificates
+  /api/v1/features:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.FeatureFlagsEnvelope'
+      summary: Platform feature flags
+      tags:
+      - discovery
+  /api/v1/i18n/messages:
+    get:
+      parameters:
+      - description: Locale code (en, am)
+        in: query
+        name: lang
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.MessagesEnvelope'
+      summary: Localized UI messages
+      tags:
+      - discovery
   /api/v1/lessons/{lessonId}:
     delete:
       parameters:
@@ -4972,6 +5232,18 @@ paths:
       summary: Unpublish lesson (back to draft)
       tags:
       - curriculum
+  /api/v1/locales:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.LocalesEnvelope'
+      summary: Supported UI locales
+      tags:
+      - discovery
   /api/v1/me/calendar:
     get:
       parameters:
@@ -5019,6 +5291,65 @@ paths:
       summary: List my certificates
       tags:
       - certificates
+  /api/v1/me/children:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.ParentLinkListEnvelope'
+      security:
+      - BearerAuth: []
+      summary: List linked students
+      tags:
+      - parents
+  /api/v1/me/children/{studentId}:
+    delete:
+      parameters:
+      - description: Student user ID
+        in: path
+        name: studentId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      security:
+      - BearerAuth: []
+      summary: Revoke parent-student link
+      tags:
+      - parents
+  /api/v1/me/children/link:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Student email
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.linkChildRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.ParentLinkEnvelope'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Link a student to parent account
+      tags:
+      - parents
   /api/v1/me/conversations:
     get:
       produces:
@@ -5167,6 +5498,29 @@ paths:
       summary: Student progress dashboard
       tags:
       - progress
+  /api/v1/me/recommendations:
+    get:
+      parameters:
+      - description: Max results (default 10)
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.RecommendationListEnvelope'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Personalized course recommendations
+      tags:
+      - discovery
   /api/v1/me/transcript:
     get:
       produces:
@@ -6097,6 +6451,49 @@ paths:
       summary: List platform roles
       tags:
       - roles
+  /api/v1/search:
+    get:
+      description: Full-text search across published courses, categories, and teachers
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      - description: all|courses|categories|teachers
+        in: query
+        name: type
+        type: string
+      - description: Course language filter
+        in: query
+        name: language
+        type: string
+      - description: Course level filter
+        in: query
+        name: level
+        type: string
+      - description: Page (courses only)
+        in: query
+        name: page
+        type: integer
+      - description: Per page (courses only)
+        in: query
+        name: per_page
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SearchEnvelope'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.ErrorResponse'
+      summary: Unified catalog search
+      tags:
+      - discovery
   /api/v1/sessions/{sessionId}:
     get:
       parameters:

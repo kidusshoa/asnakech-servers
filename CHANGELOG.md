@@ -34,6 +34,7 @@ versioning follows [Semantic Versioning](https://semver.org/).
 - Certificates: `certificates` table, PDF download, public verify, transcript/grade summary
 - Payments: orders, coupons, manual/Stripe/Chapa adapters, webhooks with idempotency, paid-course checkout
 - Analytics: admin overview, enrollment/revenue/user reports, per-course teacher analytics
+- Discovery: FTS search, recommendations, i18n (en/am), feature flags, parent-student links
 
 ### Changed
 

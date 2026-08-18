@@ -23,3 +23,4 @@ Client-facing HTTP API changes only. For the full project changelog see [../../C
 - Certificates: PDF completion certs, verification codes, transcript export
 - Payments: checkout, orders, coupons, provider webhooks, paid-course enrollment gate
 - Analytics: admin overview/reports, course-level teacher analytics
+- Discovery: unified search, recommendations, locales/messages, feature flags, parent links
